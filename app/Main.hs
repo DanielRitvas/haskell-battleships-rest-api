@@ -1,9 +1,11 @@
+{-# LANGUAGE OverloadedStrings #-}
 module Main where
-
+    
 import Parser
-import Data.List.Split
+import qualified Data.Text as T
+import qualified Data.List.Split as List
 
-game0 = "d5:coordd1:11:D1:22:10e4:prevd4:prevd4:prevd5:coordd1:11:A1:21:4e4:prevd4:prevd5:coordd1:11:A1:21:2e4:prevd5:coordd1:11:A1:22:10ee6:result3:HITe6:result3:HIT5:coordd1:11:D1:21:7ee6:result4:MISSe5:coordd1:11:H1:21:6e6:result3:HITe6:result3:HIT5:coordd1:11:J1:21:1ee6:result3:HITe"
+game0 = "d5:coordd1:11:B1:21:1e6:result4:MISS4:prevd6:result4:MISS5:coordd1:11:G1:22:10e4:prevd6:result4:MISS5:coordd1:11:G1:21:2e4:prevd6:result4:MISS5:coordd1:11:F1:21:2e4:prevd4:prevd5:coordd1:11:H1:21:8e6:result3:HIT4:prevd5:coordd1:11:A1:22:10eee5:coordd1:11:B1:21:8e6:result4:MISSeeeee"
 game1 = "l5:coordl1:B1:8e4:prevl5:coordl1:J2:10e4:prevl5:coordl1:J1:5e4:prevl5:coordl1:J1:1e4:prevl5:coordl1:F1:1e4:prevl5:coordl1:J1:9e4:prevl5:coordl1:C1:6e4:prevl5:coordl1:B1:1e4:prevl5:coordl1:F1:4e4:prevl5:coordl1:C1:3e4:prevl5:coordl1:B1:6e4:prevl5:coordl1:D2:10e4:prevl5:coordl1:I1:1e4:prevl5:coordl1:A2:10e4:prevl5:coordl1:F2:10e4:prevl5:coordl1:A1:4e4:prevl5:coordl1:J1:8e4:prevl5:coordl1:I1:2e4:prevl5:coordl1:B2:10e4:prevl5:coordl1:A1:9e4:prevl5:coordl1:D1:5e4:prevl5:coordl1:C1:1e4:prevl5:coordl1:J1:6e4:prevl5:coordl1:F1:2e4:prevl5:coordl1:D1:8e4:prevl5:coordl1:C1:2e4:prevl5:coordl1:D1:3e4:prevl5:coordl1:G1:1e4:prevl5:coordl1:A1:3e4:prevl5:coordl1:I1:6e4:prevl5:coordl1:F1:8e4:prevl5:coordl1:B1:3e4:prevl5:coordl1:B1:9e4:prevl5:coordl1:A1:3e4:prevl5:coordl1:F1:6e4:prevl5:coordl1:E2:10e4:prevl5:coordl1:C1:1e4:prevl5:coordl1:C1:8e4:prevl5:coordl1:H1:1e4:prevl5:coordl1:C1:9e4:prevl5:coordl1:I1:6e4:prevl5:coordl1:A1:8e4:prevl5:coordl1:I1:3e4:prevl5:coordl1:A1:6e4:prevl5:coordl1:G1:7e4:prevl5:coordl1:E1:7e4:prevl5:coordl1:H2:10e4:prevl5:coordl1:G2:10e4:prevl5:coordl1:E1:3e4:prevl5:coordl1:H1:2e4:prevl5:coordl1:A1:6e4:prevl5:coordl1:J1:3e4:prevl5:coordl1:A1:7e4:prevl5:coordl1:G1:3e4:prevl5:coordl1:A1:4e4:prevl5:coordl1:J1:2e4:prevl5:coordl1:E1:7e4:prevl5:coordl1:B1:4e4:prevl5:coordl1:D1:7e4:prevl5:coordl1:D1:4e4:prevl5:coordl1:G1:9e4:prevl5:coordl1:C1:6e4:prevl5:coordl1:J1:4e4:prevl5:coordl1:D1:5e4:prevl5:coordl1:I1:5e4:prevl5:coordl1:G1:9e4:prevl5:coordl1:E1:6e4:prevl5:coordl1:B1:6e4:prevl5:coordl1:C1:8e4:prevl5:coordl1:F1:4e4:prevl5:coordl1:B1:4e4:prevl5:coordl1:E1:4e4:prevl5:coordl1:G1:1e4:prevl5:coordl1:H1:1e4:prevl5:coordl1:F1:7e4:prevl5:coordl1:J1:6e4:prevl5:coordl1:J1:1e4:prevl5:coordl1:I1:7e4:prevl5:coordl1:J1:2e4:prevl5:coordl1:E1:3e4:prevl5:coordl1:H1:8e4:prevl5:coordl1:E1:8e4:prevl5:coordl1:C1:9e4:prevl5:coordl1:B1:9e4:prevl5:coordl1:C1:7e4:prevl5:coordl1:A1:1e4:prevl5:coordl1:I1:8e4:prevl5:coordl1:H1:7e4:prevl5:coordl1:H1:4e4:prevl5:coordl1:B1:2e4:prevl5:coordl1:C1:4e4:prevl5:coordl1:E1:6e4:prevl5:coordl1:B1:7e4:prevl5:coordl1:D1:1e4:prevl5:coordl1:E1:2e4:prevl5:coordl1:G1:4e4:prevl5:coordl1:I1:4e4:prevl5:coordl1:F1:9e4:prevl5:coordl1:F1:5e4:prevl5:coordl1:E1:5e4:prevl5:coordl1:B1:3e4:prevl5:coordl1:A1:7e4:prevl5:coordl1:D1:9e4:prevl5:coordl1:I1:4e4:prevl5:coordl1:D2:10e4:prevl5:coordl1:F1:6e4:prevl5:coordl1:A1:8e4:prevl5:coordl1:I2:10e4:prevl5:coordl1:H1:6e4:prevl5:coordl1:F1:3e4:prevl5:coordl1:G1:2e4:prevl5:coordl1:D1:3e4:prevl5:coordl1:G1:8e4:prevl5:coordl1:G1:7e4:prevl5:coordl1:A1:9e4:prevl5:coordl1:J1:5e4:prevl5:coordl1:J1:9e4:prevl5:coordl1:D1:2e4:prevl5:coordl1:I1:9e4:prevl5:coordl1:I1:9e4:prevl5:coordl1:E2:10e4:prevl5:coordl1:H1:4e4:prevl5:coordl1:H1:5e4:prevl5:coordl1:H1:8e4:prevl5:coordl1:C1:2e4:prevl5:coordl1:G1:8e4:prevl5:coordl1:H1:7e4:prevl5:coordl1:G1:6e4:prevl5:coordl1:F1:2e4:prevl5:coordl1:F1:8e4:prevl5:coordl1:C2:10e4:prevl5:coordl1:C1:4e4:prevl5:coordl1:I1:2e4:prevl5:coordl1:B1:8e4:prevl5:coordl1:D1:2e4:prevl5:coordl1:F2:10e4:prevl5:coordl1:D1:4e4:prevl5:coordl1:F1:5e4:prevl5:coordl1:G1:4e4:prevl5:coordl1:B2:10e4:prevl5:coordl1:E1:4e4:prevl5:coordl1:D1:9e4:prevl5:coordl1:E1:1e4:prevl5:coordl1:H2:10e4:prevl5:coordl1:C1:3e4:prevl5:coordl1:J1:7e4:prevl5:coordl1:E1:5e4:prevl5:coordl1:F1:7e4:prevl5:coordl1:B1:1e4:prevl5:coordl1:H1:9e4:prevl5:coordl1:B1:5e4:prevl5:coordl1:A1:5e4:prevl5:coordl1:F1:9e4:prevl5:coordl1:H1:5e4:prevl5:coordl1:A1:1e4:prevl5:coordl1:D1:7e4:prevl5:coordl1:A1:2e4:prevl5:coordl1:D1:6e4:prevl5:coordl1:C1:5e4:prevl5:coordl1:C1:5e4:prevl5:coordl1:H1:3e4:prevl5:coordl1:E1:1e4:prevl5:coordl1:J1:3e4:prevl5:coordl1:J1:4e4:prevl5:coordl1:D1:6e4:prevl5:coordl1:C1:7e4:prevl5:coordl1:G2:10e4:prevl5:coordl1:I1:1e4:prevl5:coordl1:H1:2ee6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result3:HITe6:result3:HITe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result3:HITe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result3:HITe6:result3:HITe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result3:HITe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result3:HITe6:result4:MISSe6:result3:HITe6:result4:MISSe6:result4:MISSe6:result3:HITe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result3:HITe6:result4:MISSe6:result3:HITe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result3:HITe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result3:HITe6:result4:MISSe6:result4:MISSe6:result3:HITe6:result4:MISSe6:result3:HITe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result3:HITe6:result4:MISSe6:result4:MISSe6:result3:HITe6:result3:HITe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result3:HITe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result3:HITe6:result4:MISSe6:result3:HITe6:result3:HITe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result3:HITe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result3:HITe6:result4:MISSe6:result4:MISSe6:result3:HITe6:result3:HITe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result3:HITe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result3:HITe6:result4:MISSe6:result3:HITe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result3:HITe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe"
 game2 = "l5:coordl1:F1:6e4:prevl5:coordl1:A1:2e4:prevl5:coordl1:B1:4e4:prevl5:coordl1:E1:8e4:prevl5:coordl1:C1:6e4:prevl5:coordl1:J1:5e4:prevl5:coordl1:A2:10ee6:result3:HITe6:result4:MISSe6:result4:MISSe6:result3:HITe6:result3:HITe6:result3:HITe"
 repeatedCoords = "l5:coordl1:B1:7e4:prevl5:coordl1:F1:4e4:prevl5:coordl1:B1:7e4:prevl5:coordl1:F2:10e4:prevl5:coordl1:E1:1e4:prevl5:coordl1:G1:4e4:prevl5:coordl1:F1:4e4:prevl5:coordl1:E1:4e4:prevl5:coordl1:G1:4e4:prevl5:coordl1:I1:4e4:prevl5:coordl1:H1:9e4:prevl5:coordl1:F1:2e4:prevl5:coordl1:B1:6ee6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe6:result4:MISSe"
@@ -17,14 +19,45 @@ isInteger str =
 
 isNotInteger str = not (isInteger str)
 
+cleanCoords str = if T.isPrefixOf "coord" (T.pack str) then "coord" else str
+
+cleanPrev str = if T.isPrefixOf "prev" (T.pack str) then "prev" else str
+
+-- cleanResult str = 
+--     if T.isPrefixOf "result" (T.pack str) 
+--         then "result" 
+--         else if T.isPrefixOf "HIT" (T.pack str)
+--             then "HIT"
+--         else if T.isPrefixOf "MISS" (T.pack str)
+--             then "MISS"
+--         else str
+
+cleanResult str  
+    | T.isPrefixOf "result" (T.pack str) = "result"
+    | T.isPrefixOf "HIT" (T.pack str) = "HIT"
+    | T.isPrefixOf "MISS" (T.pack str) = "MISS"
+    | otherwise = str
+
+cleanCoord c = case c of 
+    c -> "HUJ"
+    c -> c
+
+double2nd xss = case xss of
+    "coord":cordX:cordY:tail ->
+        "coord" : cleanCoord cordX : cordY : double2nd tail
+    -- potentialCoord:cordX:cordY:rest -> 
+    --     if potentialCoord == "result"
+    --         then (potentialCoord ++ "ALA") : cordX : cordY : double2nd rest 
+    --         else potentialCoord : cordX : cordY : double2nd rest
+    a -> a
 
 -- d5:coordd1:11:B1:21:1e6:result4:MISS4:prevd6:result4:MISS5:coordd1:11:G1
 main :: IO ()
 main = do  
-    let miau = tail $ splitOn ":" game0
+    let miau = tail $ List.splitOn ":" game0
         miauu = [c | c <- miau, isNotInteger c]
-        -- miauuu = [c | c <- miauu, "coord" `isPrefixOf` c]
-    print miauu
+        miauuu = [cleanResult (cleanPrev (cleanCoords c)) | c <- miauu]
+    print $ double2nd miauuu
     -- let lastElementIsLastPrev = splitOn "prev" game0
         -- fullElementSomewhereAtTheBeggining = last lastElementIsLastPrev
         -- fullLastElement = last $ reverse $ splitOn "ee6" fullElementSomewhereAtTheBeggining
