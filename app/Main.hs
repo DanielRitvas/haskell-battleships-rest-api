@@ -3,8 +3,11 @@ module Main where
 
 import Data.Char(digitToInt)
 
-data Move = Empty | Msg { coord :: (String, String)
-                        , result :: String
+type Coordinates = (String, String)
+data ResultType = HIT | MISS deriving (Eq,Ord,Enum,Show)
+
+data Move = Empty | Msg { coords :: Coordinates
+                        , result :: ResultType
                         , prev :: Move } deriving Show
 
 singleMove = "d5:coordd1:11:D1:21:4e6:result4:MISSe"
@@ -16,16 +19,35 @@ game0 = "d4:prevd4:prevd5:coordd1:11:H1:22:10e4:prevd5:coordd1:11:I1:21:6e6:resu
 main = do
     let message = singleMove
     let messageWithRemovedOuterBoundaries = tryToRemoveOuterBoundaries message
-    let (coord, tail) = readUpcommingKey messageWithRemovedOuterBoundaries
-    print $ readDictionary tail
+    let (keyCoords, tail1) = readUpcommingKey messageWithRemovedOuterBoundaries
+    let (coords, tail2) = readCoords tail1
+    let (keyResult, tail3) = readUpcommingKey tail2
+    print $ readResult tail3
 
-readDictionary :: String -> [String]
+readResult :: String -> (ResultType, String)
+readResult message = do
+    let (resultValue, tail) = readUpcommingKey message
+    if resultValue == show HIT
+        then (HIT, tail)
+    else if resultValue == show MISS
+        then (MISS, tail)
+    else error $ createSyntaxError "Result can be only HIT or MISS"
+
+
+readCoords :: String -> (Coordinates, String)
+readCoords message = do
+    let (dictionary, tail) = readDictionary message
+    if length dictionary == 2
+        then ((head dictionary, last dictionary), tail)
+    else error $ createSyntaxError "Coords dictionary should be size of 2"
+
+readDictionary :: String -> ([String], String)
 readDictionary messageWithDictionaryAtTheBeggining = do
     let (didRemoveFirst, d1) = removeFirstIfMatched 'd' messageWithDictionaryAtTheBeggining
     if didRemoveFirst
         then do
             let (dictionaryContents, tail) = splitAtFirst 'e' d1
-            getDictionaryElements dictionaryContents []
+            (getDictionaryElements dictionaryContents [], tail)
         else error $ createSyntaxError "Dictionary should start from 'd'"
     where
         getDictionaryElements :: String -> [String] -> [String]
