@@ -2,27 +2,53 @@
 module Main where
 
 import Data.Char(digitToInt)
+import Debug.Trace
 
 type Coordinates = (String, String)
-data ResultType = HIT | MISS deriving (Eq,Ord,Enum,Show)
+data ResultType = HIT | MISS | NONE deriving (Eq,Ord,Enum,Show)
 
-data Move = Empty | Msg { coords :: Coordinates
+data Move = Empty | ValidMove { coords :: Coordinates
                         , result :: ResultType
                         , prev :: Move } deriving Show
 
-singleMove = "d5:coordd1:11:D1:21:4e6:result4:MISSe"
-twoMoves = "d6:result4:MISS5:coordd1:11:E1:21:2e4:prevd5:coordd1:11:H1:22:10e6:result4:MISSee"
-twoMovesPrevFirst = "d4:prevd5:coordd1:11:H1:22:10e6:result4:MISSe6:result4:MISS5:coordd1:11:E1:21:2ee"
+singleMove = "d6:result4:MISS5:coordd1:11:D1:21:4ee"
+singleMove2 = "d5:coordd1:11:A1:21:4ee"
+twoMoves = "d6:result3:HIT5:coordd1:11:E1:21:2e4:prevd5:coordd1:11:H1:22:10e6:result4:MISSee"
+twoMovesPrevFirst = "d4:prevd5:coordd1:11:H1:22:10e6:result3:HITe6:result4:MISS5:coordd1:11:E1:21:2ee"
 
-game0 = "d4:prevd4:prevd5:coordd1:11:H1:22:10e4:prevd5:coordd1:11:I1:21:6e6:result4:MISS4:prevd5:coordd1:11:B1:21:5e4:prevd4:prevd5:coordd1:11:A1:21:2e4:prevd6:result4:MISS5:coordd1:11:G1:21:7e4:prevd6:result4:MISS5:coordd1:11:C1:21:4e4:prevd4:prevd5:coordd1:11:J1:21:9e6:result4:MISS4:prevd4:prevd5:coordd1:11:B1:21:6ee6:result4:MISS5:coordd1:11:G1:21:2eee6:result3:HIT5:coordd1:11:H1:21:9eeee6:result3:HITe5:coordd1:11:J1:21:2e6:result3:HITe6:result3:HITee6:result4:MISSe5:coordd1:11:E1:21:5e6:result4:MISSe6:result4:MISS5:coordd1:11:E1:21:2ee"
+game0 = "d4:prevd6:result4:MISS5:coordd1:11:F1:21:2e4:prevd5:coordd1:11:E1:22:10e4:prevd6:result4:MISS4:prevd6:result4:MISS5:coordd1:11:J1:21:8e4:prevd4:prevd4:prevd6:result4:MISS4:prevd5:coordd1:11:D1:21:4e6:result4:MISS4:prevd5:coordd1:11:I1:21:3e6:result4:MISS4:prevd4:prevd5:coordd1:11:A1:22:10e6:result4:MISS4:prevd4:prevd5:coordd1:11:C1:21:5e6:result4:MISS4:prevd5:coordd1:11:E1:21:7e6:result4:MISS4:prevd4:prevd4:prevd4:prevd5:coordd1:11:H1:22:10e4:prevd4:prevd6:result4:MISS5:coordd1:11:G1:21:9e4:prevd6:result4:MISS4:prevd6:result3:HIT4:prevd4:prevd5:coordd1:11:H1:21:8e4:prevd6:result4:MISS5:coordd1:11:J1:22:10e4:prevd6:result4:MISS4:prevd4:prevd5:coordd1:11:F1:22:10e4:prevd5:coordd1:11:D1:21:4e6:result4:MISS4:prevd6:result4:MISS4:prevd4:prevd6:result4:MISS4:prevd5:coordd1:11:A1:21:9e4:prevd4:prevd4:prevd6:result4:MISS4:prevd5:coordd1:11:D1:21:6e4:prevd6:result4:MISS4:prevd4:prevd4:prevd4:prevd4:prevd5:coordd1:11:B1:21:7e4:prevd6:result4:MISS4:prevd6:result4:MISS5:coordd1:11:D1:21:3e4:prevd6:result3:HIT5:coordd1:11:H1:21:2e4:prevd4:prevd4:prevd4:prevd4:prevd6:result4:MISS4:prevd6:result4:MISS5:coordd1:11:H1:21:9e4:prevd6:result4:MISS4:prevd6:result4:MISS5:coordd1:11:E1:21:3e4:prevd5:coordd1:11:E1:21:4e4:prevd5:coordd1:11:A1:21:9e4:prevd5:coordd1:11:B1:21:1e6:result3:HIT4:prevd4:prevd4:prevd6:result4:MISS4:prevd5:coordd1:11:J1:21:5e4:prevd5:coordd1:11:F1:21:6e4:prevd5:coordd1:11:C1:21:1e4:prevd5:coordd1:11:F1:21:8e6:result3:HIT4:prevd6:result3:HIT4:prevd6:result4:MISS4:prevd6:result3:HIT5:coordd1:11:J1:21:8e4:prevd6:result3:HIT4:prevd4:prevd6:result4:MISS4:prevd5:coordd1:11:E1:22:10e6:result4:MISS4:prevd6:result4:MISS4:prevd6:result4:MISS4:prevd6:result4:MISS4:prevd5:coordd1:11:C1:21:6e4:prevd4:prevd4:prevd6:result4:MISS5:coordd1:11:C1:21:8e4:prevd6:result4:MISS4:prevd6:result4:MISS4:prevd5:coordd1:11:E1:21:7e6:result4:MISS4:prevd6:result4:MISS4:prevd6:result4:MISS5:coordd1:11:H1:21:4e4:prevd4:prevd6:result4:MISS4:prevd6:result4:MISS4:prevd4:prevd5:coordd1:11:I1:21:5e6:result3:HIT4:prevd4:prevd5:coordd1:11:J1:21:3e6:result3:HIT4:prevd6:result4:MISS4:prevd5:coordd1:11:B1:21:1e6:result4:MISS4:prevd5:coordd1:11:H1:21:7e6:result3:HIT4:prevd5:coordd1:11:A1:21:3e6:result4:MISS4:prevd5:coordd1:11:I1:21:6e4:prevd6:result4:MISS4:prevd5:coordd1:11:D1:21:5e6:result4:MISS4:prevd6:result4:MISS5:coordd1:11:H1:21:5e4:prevd4:prevd5:coordd1:11:F1:21:9e4:prevd6:result4:MISS5:coordd1:11:G1:21:1e4:prevd6:result3:HIT4:prevd4:prevd6:result3:HIT5:coordd1:11:G1:21:6e4:prevd4:prevd6:result4:MISS4:prevd5:coordd1:11:D1:22:10e6:result4:MISS4:prevd4:prevd4:prevd4:prevd6:result3:HIT5:coordd1:11:D1:21:9e4:prevd6:result4:MISS5:coordd1:11:J1:22:10e4:prevd6:result4:MISS5:coordd1:11:E1:21:3e4:prevd4:prevd4:prevd6:result4:MISS4:prevd6:result4:MISS5:coordd1:11:F1:21:9e4:prevd6:result4:MISS4:prevd6:result4:MISS5:coordd1:11:B1:21:3e4:prevd5:coordd1:11:E1:21:5e6:result4:MISS4:prevd4:prevd5:coordd1:11:B1:21:5e6:result4:MISS4:prevd5:coordd1:11:J1:21:7e6:result3:HIT4:prevd6:result4:MISS5:coordd1:11:J1:21:1e4:prevd5:coordd1:11:G1:21:8e6:result4:MISS4:prevd5:coordd1:11:F1:21:2e6:result4:MISS4:prevd5:coordd1:11:C1:21:3e4:prevd4:prevd4:prevd4:prevd4:prevd6:result4:MISS5:coordd1:11:J1:21:6e4:prevd5:coordd1:11:F1:21:8e6:result3:HIT4:prevd4:prevd6:result4:MISS5:coordd1:11:F1:21:7e4:prevd5:coordd1:11:F1:21:1e6:result3:HIT4:prevd5:coordd1:11:I1:21:1e4:prevd5:coordd1:11:G1:22:10e4:prevd4:prevd4:prevd6:result3:HIT4:prevd4:prevd6:result4:MISS4:prevd5:coordd1:11:E1:21:8ee5:coordd1:11:I1:21:4ee5:coordd1:11:H1:21:6e6:result4:MISSe5:coordd1:11:C1:21:4ee5:coordd1:11:I1:21:7e6:result4:MISSe5:coordd1:11:C1:21:2e6:result4:MISSe6:result4:MISSe6:result4:MISSeee6:result3:HIT5:coordd1:11:C1:22:10eeee5:coordd1:11:D1:21:2e6:result4:MISSe5:coordd1:11:B1:21:8e6:result4:MISSe5:coordd1:11:A1:21:7e6:result4:MISSe5:coordd1:11:D1:21:8e6:result4:MISSe6:result4:MISSeeeeee6:result4:MISS5:coordd1:11:G1:21:2eeee5:coordd1:11:I1:21:2eee5:coordd1:11:E1:21:4ee6:result4:MISS5:coordd1:11:I1:22:10ee5:coordd1:11:I1:21:4e6:result3:HITeeee5:coordd1:11:B1:21:3e6:result4:MISSe6:result4:MISS5:coordd1:11:B1:21:9ee6:result3:HIT5:coordd1:11:E1:21:6eee5:coordd1:11:I1:21:6ee5:coordd1:11:B1:22:10e6:result4:MISSee5:coordd1:11:G1:21:6e6:result3:HITe5:coordd1:11:A1:21:7eee6:result4:MISSe5:coordd1:11:A1:21:1e6:result4:MISSeee5:coordd1:11:I1:21:1ee6:result3:HITeeee5:coordd1:11:H1:21:6eee5:coordd1:11:I1:21:9e6:result3:HITee5:coordd1:11:E1:21:8e6:result4:MISSe5:coordd1:11:D1:21:3ee5:coordd1:11:H1:21:9ee6:result4:MISS5:coordd1:11:I1:21:3eee5:coordd1:11:H1:21:4eee5:coordd1:11:B1:21:4ee5:coordd1:11:F1:21:4eee5:coordd1:11:B1:21:5e6:result4:MISSe5:coordd1:11:E1:21:9e6:result4:MISSe6:result4:MISSe5:coordd1:11:B1:21:2ee5:coordd1:11:G1:21:4ee5:coordd1:11:D1:21:5eee5:coordd1:11:F1:21:4ee5:coordd1:11:J1:21:2e6:result4:MISSe5:coordd1:11:I1:21:9eee5:coordd1:11:A1:21:4ee5:coordd1:11:C1:22:10eee6:result4:MISSe6:result4:MISSe6:result4:MISSe5:coordd1:11:D1:21:2ee5:coordd1:11:J1:21:4e6:result4:MISSe5:coordd1:11:J1:21:9e6:result4:MISSee6:result4:MISSe6:result4:MISSee5:coordd1:11:F1:21:1eee5:coordd1:11:I1:21:5ee5:coordd1:11:B1:21:7e6:result4:MISSe6:result4:MISS5:coordd1:11:H1:21:5ee5:coordd1:11:A1:21:1e6:result4:MISSe5:coordd1:11:G1:21:7e6:result4:MISSeee5:coordd1:11:G1:21:5ee6:result4:MISSe5:coordd1:11:J1:21:5e6:result4:MISSe6:result4:MISS5:coordd1:11:D1:21:7ee5:coordd1:11:J1:21:7e6:result4:MISSe5:coordd1:11:E1:21:1e6:result4:MISSe5:coordd1:11:D1:21:7ee6:result4:MISSe5:coordd1:11:A1:21:5ee6:result3:HIT5:coordd1:11:A1:21:6ee6:result4:MISS5:coordd1:11:J1:21:2ee6:result3:HITe5:coordd1:11:H1:21:1ee6:result4:MISS5:coordd1:11:H1:21:1ee5:coordd1:11:G1:21:2eee6:result4:MISSe6:result4:MISS5:coordd1:11:F1:22:10ee5:coordd1:11:E1:21:2eee6:result3:HITe5:coordd1:11:A1:21:3e6:result4:MISSe5:coordd1:11:C1:21:7ee5:coordd1:11:D1:21:8eee6:result4:MISS5:coordd1:11:I1:21:7ee6:result4:MISSe6:result4:MISS5:coordd1:11:J1:21:3ee6:result3:HIT5:coordd1:11:I1:21:8ee6:result4:MISS5:coordd1:11:F1:21:5eeee6:result4:MISS5:coordd1:11:J1:21:4eee6:result3:HIT5:coordd1:11:H1:21:7eeee5:coordd1:11:E1:21:5ee6:result4:MISS5:coordd1:11:G1:21:8ee6:result4:MISS5:coordd1:11:C1:21:9eee5:coordd1:11:C1:21:8ee6:result4:MISSee5:coordd1:11:C1:21:3e6:result4:MISSe"
+game1 = "d4:prevd5:coordd1:11:H1:21:5e6:result4:MISS4:prevd4:prevd5:coordd1:11:E1:21:9e4:prevd6:result3:HIT5:coordd1:11:C1:21:3e4:prevd6:result4:MISS5:coordd1:11:I1:21:6e4:prevd6:result3:HIT5:coordd1:11:I1:21:2e4:prevd4:prevd4:prevd5:coordd1:11:C1:21:1e4:prevd6:result4:MISS4:prevd4:prevd6:result4:MISS5:coordd1:11:J1:21:7e4:prevd6:result4:MISS5:coordd1:11:A1:21:9e4:prevd5:coordd1:11:I1:21:8e6:result4:MISS4:prevd5:coordd1:11:E1:21:8e6:result3:HIT4:prevd4:prevd4:prevd5:coordd1:11:C1:21:2ee5:coordd1:11:A1:21:7e6:result4:MISSe6:result4:MISS5:coordd1:11:J1:21:3eeeeee5:coordd1:11:A1:21:3e6:result4:MISSe5:coordd1:11:B1:22:10ee6:result3:HITe5:coordd1:11:D1:21:9e6:result4:MISSe5:coordd1:11:F1:21:6e6:result4:MISSeeee6:result4:MISSe5:coordd1:11:D1:21:8e6:result4:MISSee6:result4:MISS5:coordd1:11:G1:21:8ee"
+
+emptyMove = ValidMove ("", "") NONE Empty
 
 main = do
-    let message = singleMove
-    let messageWithRemovedOuterBoundaries = tryToRemoveOuterBoundaries message
-    let (keyCoords, tail1) = readUpcommingKey messageWithRemovedOuterBoundaries
-    let (coords, tail2) = readCoords tail1
-    let (keyResult, tail3) = readUpcommingKey tail2
-    print $ readResult tail3
+    let message = game1
+    -- At the end, tail should be empty
+    let (parsedMoves, tail) = readMove emptyMove message
+    print parsedMoves
+
+readMove :: Move -> String -> (Move, String)
+readMove move "" = (move, "")
+readMove move ('e':message) = (move, message)
+readMove move message = do
+    let (didRemoveFirst, removedStartBoundary) = removeFirstIfMatched 'd' message
+    let (key, tail) = readUpcommingKey removedStartBoundary
+    if key == ""
+        then (move, "")
+    else if key == "coord"
+        then do
+            let (coords, finalTail) = readCoords tail
+            readMove (ValidMove coords (result move) (prev move)) finalTail
+    else if key == "result"
+        then do
+            let (result, finalTail) = readResult tail
+            readMove (ValidMove (coords move) result (prev move)) finalTail
+    else if key == "prev"
+        then do
+            let (prev, finalTail) = readMove emptyMove tail
+            readMove (ValidMove (coords move) (result move) prev) finalTail
+    else error $ createSyntaxError ("Unexpected key " ++ key)
+
 
 readResult :: String -> (ResultType, String)
 readResult message = do
@@ -70,14 +96,16 @@ readUpcommingValue message = do
 -- Possible key detection
 -- Error | Key and rest of the message
 readUpcommingKey :: String -> (String, String)
-readUpcommingKey message =
-    case message of
-    (keyLength:':':tail) -> do
-        let upcommingKey = take (digitToInt keyLength) tail
-        let restOfTheMessage = drop (digitToInt keyLength) tail
-        (upcommingKey, restOfTheMessage)
-    anyMessage ->
-        error "valueLength:value pair expected."
+readUpcommingKey message = do
+    let (_, removedPreviousEnd) = removeFirstIfMatched 'e' message
+    case removedPreviousEnd of
+        "" -> ("", "")
+        (keyLength:':':tail) -> do
+            let upcommingKey = take (digitToInt keyLength) tail
+            let restOfTheMessage = drop (digitToInt keyLength) tail
+            (upcommingKey, restOfTheMessage)
+        anyMessage ->
+            error $ createSyntaxError "valueLength:value pair expected: " ++ message
 
 -- Outer boundaries removal
 tryToRemoveOuterBoundaries :: String -> String
@@ -114,19 +142,3 @@ appendList a = foldr (:) [a]
 
 prependList :: Eq a => a -> [a] -> [a]
 prependList element list = element:list
-
--- parseCoordAfterPrev :: String -> Either String String
--- parseCoordAfterPrev json = 
---     let 
---         reversedJson = reverse json --}"7":"2","C":"1"{:"drooc",}}"7":"2","C":"1"{:"drooc"{:"verp","TIH":"tluser"
---         countUntilFirstComma = takeWhile (/=',') reversedJson
---         reversedCoordJsonFirstComma = take (length countUntilFirstComma + 1) reversedJson --"7":"2",
---         dropUntilFirstComma = drop (length countUntilFirstComma + 1) reversedJson --"C":"1"{:"drooc",}}"7":"2","C":"1"{:"drooc"{:"verp","TIH":"tluser"
---         countUntilSecondComma = takeWhile (/=',') dropUntilFirstComma 
---         reversedCoordJsonSecondComma = take (length countUntilSecondComma) dropUntilFirstComma --"C":"1"{:"drooc"
---         dropUntilSecondComma = drop (length countUntilSecondComma + 1) dropUntilFirstComma --}}"7":"2","C":"1"{:"drooc"{:"verp","TIH":"tluser"
---         allCoord = reverse (reversedCoordJsonFirstComma ++ reversedCoordJsonSecondComma)
---         unreversedMain = reverse dropUntilSecondComma
---         main = allCoord ++ unreversedMain
---     in 
---         dropChars ["\"coord\"", ":", "{", "\"", "1", "\"", ":", "\""] main
