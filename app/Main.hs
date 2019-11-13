@@ -9,7 +9,7 @@ data ResultType = HIT | MISS | NONE deriving (Eq,Ord,Enum,Show)
 
 data Move = Empty | ValidMove { coords :: Coordinates
                         , result :: ResultType
-                        , prev :: Move } deriving Show
+                        , prev :: Move } deriving (Show, Eq)
 
 singleMove = "d6:result4:MISS5:coordd1:11:D1:21:4ee"
 singleMove2 = "d5:coordd1:11:A1:21:4ee"
@@ -24,9 +24,26 @@ emptyMove = ValidMove ("", "") NONE Empty
 main = do
     let message = game1
     -- At the end, tail should be empty
-    let (parsedMoves, tail) = readMove emptyMove message
-    print parsedMoves
+    let (parsedMoves, _) = readMove emptyMove message
+    print $ calculateScore parsedMoves
 
+calculateScore :: Move -> Int
+calculateScore move = do
+    let (_, score) = getPrev move 0
+    score
+    where
+        getPrev :: Move -> Int -> (Move, Int)
+        getPrev move score =
+            if prev move /= Empty
+                then getPrev (prev move) (incrementScoreIfHit (prev move) score)
+                else (move, incrementScoreIfHit move score)
+        incrementScoreIfHit :: Move -> Int -> Int
+        incrementScoreIfHit move score =
+            if result move == HIT
+                then score + 1
+                else score
+
+-- Returns fully or partially parsed move and rest of the message.
 readMove :: Move -> String -> (Move, String)
 readMove move "" = (move, "")
 readMove move ('e':message) = (move, message)
