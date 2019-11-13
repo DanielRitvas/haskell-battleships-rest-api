@@ -18,30 +18,37 @@ twoMovesPrevFirst = "d4:prevd5:coordd1:11:H1:22:10e6:result3:HITe6:result4:MISS5
 
 game0 = "d4:prevd6:result4:MISS5:coordd1:11:F1:21:2e4:prevd5:coordd1:11:E1:22:10e4:prevd6:result4:MISS4:prevd6:result4:MISS5:coordd1:11:J1:21:8e4:prevd4:prevd4:prevd6:result4:MISS4:prevd5:coordd1:11:D1:21:4e6:result4:MISS4:prevd5:coordd1:11:I1:21:3e6:result4:MISS4:prevd4:prevd5:coordd1:11:A1:22:10e6:result4:MISS4:prevd4:prevd5:coordd1:11:C1:21:5e6:result4:MISS4:prevd5:coordd1:11:E1:21:7e6:result4:MISS4:prevd4:prevd4:prevd4:prevd5:coordd1:11:H1:22:10e4:prevd4:prevd6:result4:MISS5:coordd1:11:G1:21:9e4:prevd6:result4:MISS4:prevd6:result3:HIT4:prevd4:prevd5:coordd1:11:H1:21:8e4:prevd6:result4:MISS5:coordd1:11:J1:22:10e4:prevd6:result4:MISS4:prevd4:prevd5:coordd1:11:F1:22:10e4:prevd5:coordd1:11:D1:21:4e6:result4:MISS4:prevd6:result4:MISS4:prevd4:prevd6:result4:MISS4:prevd5:coordd1:11:A1:21:9e4:prevd4:prevd4:prevd6:result4:MISS4:prevd5:coordd1:11:D1:21:6e4:prevd6:result4:MISS4:prevd4:prevd4:prevd4:prevd4:prevd5:coordd1:11:B1:21:7e4:prevd6:result4:MISS4:prevd6:result4:MISS5:coordd1:11:D1:21:3e4:prevd6:result3:HIT5:coordd1:11:H1:21:2e4:prevd4:prevd4:prevd4:prevd4:prevd6:result4:MISS4:prevd6:result4:MISS5:coordd1:11:H1:21:9e4:prevd6:result4:MISS4:prevd6:result4:MISS5:coordd1:11:E1:21:3e4:prevd5:coordd1:11:E1:21:4e4:prevd5:coordd1:11:A1:21:9e4:prevd5:coordd1:11:B1:21:1e6:result3:HIT4:prevd4:prevd4:prevd6:result4:MISS4:prevd5:coordd1:11:J1:21:5e4:prevd5:coordd1:11:F1:21:6e4:prevd5:coordd1:11:C1:21:1e4:prevd5:coordd1:11:F1:21:8e6:result3:HIT4:prevd6:result3:HIT4:prevd6:result4:MISS4:prevd6:result3:HIT5:coordd1:11:J1:21:8e4:prevd6:result3:HIT4:prevd4:prevd6:result4:MISS4:prevd5:coordd1:11:E1:22:10e6:result4:MISS4:prevd6:result4:MISS4:prevd6:result4:MISS4:prevd6:result4:MISS4:prevd5:coordd1:11:C1:21:6e4:prevd4:prevd4:prevd6:result4:MISS5:coordd1:11:C1:21:8e4:prevd6:result4:MISS4:prevd6:result4:MISS4:prevd5:coordd1:11:E1:21:7e6:result4:MISS4:prevd6:result4:MISS4:prevd6:result4:MISS5:coordd1:11:H1:21:4e4:prevd4:prevd6:result4:MISS4:prevd6:result4:MISS4:prevd4:prevd5:coordd1:11:I1:21:5e6:result3:HIT4:prevd4:prevd5:coordd1:11:J1:21:3e6:result3:HIT4:prevd6:result4:MISS4:prevd5:coordd1:11:B1:21:1e6:result4:MISS4:prevd5:coordd1:11:H1:21:7e6:result3:HIT4:prevd5:coordd1:11:A1:21:3e6:result4:MISS4:prevd5:coordd1:11:I1:21:6e4:prevd6:result4:MISS4:prevd5:coordd1:11:D1:21:5e6:result4:MISS4:prevd6:result4:MISS5:coordd1:11:H1:21:5e4:prevd4:prevd5:coordd1:11:F1:21:9e4:prevd6:result4:MISS5:coordd1:11:G1:21:1e4:prevd6:result3:HIT4:prevd4:prevd6:result3:HIT5:coordd1:11:G1:21:6e4:prevd4:prevd6:result4:MISS4:prevd5:coordd1:11:D1:22:10e6:result4:MISS4:prevd4:prevd4:prevd4:prevd6:result3:HIT5:coordd1:11:D1:21:9e4:prevd6:result4:MISS5:coordd1:11:J1:22:10e4:prevd6:result4:MISS5:coordd1:11:E1:21:3e4:prevd4:prevd4:prevd6:result4:MISS4:prevd6:result4:MISS5:coordd1:11:F1:21:9e4:prevd6:result4:MISS4:prevd6:result4:MISS5:coordd1:11:B1:21:3e4:prevd5:coordd1:11:E1:21:5e6:result4:MISS4:prevd4:prevd5:coordd1:11:B1:21:5e6:result4:MISS4:prevd5:coordd1:11:J1:21:7e6:result3:HIT4:prevd6:result4:MISS5:coordd1:11:J1:21:1e4:prevd5:coordd1:11:G1:21:8e6:result4:MISS4:prevd5:coordd1:11:F1:21:2e6:result4:MISS4:prevd5:coordd1:11:C1:21:3e4:prevd4:prevd4:prevd4:prevd4:prevd6:result4:MISS5:coordd1:11:J1:21:6e4:prevd5:coordd1:11:F1:21:8e6:result3:HIT4:prevd4:prevd6:result4:MISS5:coordd1:11:F1:21:7e4:prevd5:coordd1:11:F1:21:1e6:result3:HIT4:prevd5:coordd1:11:I1:21:1e4:prevd5:coordd1:11:G1:22:10e4:prevd4:prevd4:prevd6:result3:HIT4:prevd4:prevd6:result4:MISS4:prevd5:coordd1:11:E1:21:8ee5:coordd1:11:I1:21:4ee5:coordd1:11:H1:21:6e6:result4:MISSe5:coordd1:11:C1:21:4ee5:coordd1:11:I1:21:7e6:result4:MISSe5:coordd1:11:C1:21:2e6:result4:MISSe6:result4:MISSe6:result4:MISSeee6:result3:HIT5:coordd1:11:C1:22:10eeee5:coordd1:11:D1:21:2e6:result4:MISSe5:coordd1:11:B1:21:8e6:result4:MISSe5:coordd1:11:A1:21:7e6:result4:MISSe5:coordd1:11:D1:21:8e6:result4:MISSe6:result4:MISSeeeeee6:result4:MISS5:coordd1:11:G1:21:2eeee5:coordd1:11:I1:21:2eee5:coordd1:11:E1:21:4ee6:result4:MISS5:coordd1:11:I1:22:10ee5:coordd1:11:I1:21:4e6:result3:HITeeee5:coordd1:11:B1:21:3e6:result4:MISSe6:result4:MISS5:coordd1:11:B1:21:9ee6:result3:HIT5:coordd1:11:E1:21:6eee5:coordd1:11:I1:21:6ee5:coordd1:11:B1:22:10e6:result4:MISSee5:coordd1:11:G1:21:6e6:result3:HITe5:coordd1:11:A1:21:7eee6:result4:MISSe5:coordd1:11:A1:21:1e6:result4:MISSeee5:coordd1:11:I1:21:1ee6:result3:HITeeee5:coordd1:11:H1:21:6eee5:coordd1:11:I1:21:9e6:result3:HITee5:coordd1:11:E1:21:8e6:result4:MISSe5:coordd1:11:D1:21:3ee5:coordd1:11:H1:21:9ee6:result4:MISS5:coordd1:11:I1:21:3eee5:coordd1:11:H1:21:4eee5:coordd1:11:B1:21:4ee5:coordd1:11:F1:21:4eee5:coordd1:11:B1:21:5e6:result4:MISSe5:coordd1:11:E1:21:9e6:result4:MISSe6:result4:MISSe5:coordd1:11:B1:21:2ee5:coordd1:11:G1:21:4ee5:coordd1:11:D1:21:5eee5:coordd1:11:F1:21:4ee5:coordd1:11:J1:21:2e6:result4:MISSe5:coordd1:11:I1:21:9eee5:coordd1:11:A1:21:4ee5:coordd1:11:C1:22:10eee6:result4:MISSe6:result4:MISSe6:result4:MISSe5:coordd1:11:D1:21:2ee5:coordd1:11:J1:21:4e6:result4:MISSe5:coordd1:11:J1:21:9e6:result4:MISSee6:result4:MISSe6:result4:MISSee5:coordd1:11:F1:21:1eee5:coordd1:11:I1:21:5ee5:coordd1:11:B1:21:7e6:result4:MISSe6:result4:MISS5:coordd1:11:H1:21:5ee5:coordd1:11:A1:21:1e6:result4:MISSe5:coordd1:11:G1:21:7e6:result4:MISSeee5:coordd1:11:G1:21:5ee6:result4:MISSe5:coordd1:11:J1:21:5e6:result4:MISSe6:result4:MISS5:coordd1:11:D1:21:7ee5:coordd1:11:J1:21:7e6:result4:MISSe5:coordd1:11:E1:21:1e6:result4:MISSe5:coordd1:11:D1:21:7ee6:result4:MISSe5:coordd1:11:A1:21:5ee6:result3:HIT5:coordd1:11:A1:21:6ee6:result4:MISS5:coordd1:11:J1:21:2ee6:result3:HITe5:coordd1:11:H1:21:1ee6:result4:MISS5:coordd1:11:H1:21:1ee5:coordd1:11:G1:21:2eee6:result4:MISSe6:result4:MISS5:coordd1:11:F1:22:10ee5:coordd1:11:E1:21:2eee6:result3:HITe5:coordd1:11:A1:21:3e6:result4:MISSe5:coordd1:11:C1:21:7ee5:coordd1:11:D1:21:8eee6:result4:MISS5:coordd1:11:I1:21:7ee6:result4:MISSe6:result4:MISS5:coordd1:11:J1:21:3ee6:result3:HIT5:coordd1:11:I1:21:8ee6:result4:MISS5:coordd1:11:F1:21:5eeee6:result4:MISS5:coordd1:11:J1:21:4eee6:result3:HIT5:coordd1:11:H1:21:7eeee5:coordd1:11:E1:21:5ee6:result4:MISS5:coordd1:11:G1:21:8ee6:result4:MISS5:coordd1:11:C1:21:9eee5:coordd1:11:C1:21:8ee6:result4:MISSee5:coordd1:11:C1:21:3e6:result4:MISSe"
 game1 = "d4:prevd5:coordd1:11:H1:21:5e6:result4:MISS4:prevd4:prevd5:coordd1:11:E1:21:9e4:prevd6:result3:HIT5:coordd1:11:C1:21:3e4:prevd6:result4:MISS5:coordd1:11:I1:21:6e4:prevd6:result3:HIT5:coordd1:11:I1:21:2e4:prevd4:prevd4:prevd5:coordd1:11:C1:21:1e4:prevd6:result4:MISS4:prevd4:prevd6:result4:MISS5:coordd1:11:J1:21:7e4:prevd6:result4:MISS5:coordd1:11:A1:21:9e4:prevd5:coordd1:11:I1:21:8e6:result4:MISS4:prevd5:coordd1:11:E1:21:8e6:result3:HIT4:prevd4:prevd4:prevd5:coordd1:11:C1:21:2ee5:coordd1:11:A1:21:7e6:result4:MISSe6:result4:MISS5:coordd1:11:J1:21:3eeeeee5:coordd1:11:A1:21:3e6:result4:MISSe5:coordd1:11:B1:22:10ee6:result3:HITe5:coordd1:11:D1:21:9e6:result4:MISSe5:coordd1:11:F1:21:6e6:result4:MISSeeee6:result4:MISSe5:coordd1:11:D1:21:8e6:result4:MISSee6:result4:MISS5:coordd1:11:G1:21:8ee"
+game2 = "d4:prevd5:coordd1:11:E1:21:3e6:result3:HIT4:prevd6:result4:MISS5:coordd1:11:J1:21:1e4:prevd5:coordd1:11:E1:21:1e4:prevd5:coordd1:11:J1:21:6e4:prevd5:coordd1:11:A1:21:3e6:result4:MISS4:prevd5:coordd1:11:H1:22:10e6:result4:MISS4:prevd6:result4:MISS4:prevd5:coordd1:11:F1:21:4e4:prevd6:result4:MISS5:coordd1:11:A1:21:7e4:prevd6:result3:HIT4:prevd5:coordd1:11:I1:21:9e6:result4:MISS4:prevd5:coordd1:11:C1:21:5e6:result3:HIT4:prevd5:coordd1:11:G1:21:7e6:result4:MISS4:prevd5:coordd1:11:F1:21:2e6:result4:MISS4:prevd6:result4:MISS4:prevd4:prevd6:result4:MISS5:coordd1:11:B1:21:8e4:prevd4:prevd6:result4:MISS5:coordd1:11:C1:22:10e4:prevd4:prevd6:result4:MISS4:prevd6:result3:HIT5:coordd1:11:H1:21:3e4:prevd5:coordd1:11:J1:22:10e4:prevd5:coordd1:11:C1:21:6e4:prevd6:result4:MISS4:prevd5:coordd1:11:F1:21:5e4:prevd6:result4:MISS4:prevd6:result4:MISS5:coordd1:11:H1:21:1e4:prevd5:coordd1:11:A1:21:1e4:prevd6:result4:MISS5:coordd1:11:E1:21:6e4:prevd4:prevd5:coordd1:11:F1:21:6e4:prevd5:coordd1:11:G1:21:3e4:prevd5:coordd1:11:I1:22:10e6:result4:MISS4:prevd4:prevd6:result4:MISS4:prevd5:coordd1:11:H1:21:3e6:result4:MISS4:prevd5:coordd1:11:D1:21:7e4:prevd5:coordd1:11:H1:21:5e6:result4:MISS4:prevd5:coordd1:11:J1:21:4e6:result3:HIT4:prevd4:prevd5:coordd1:11:H1:21:9e4:prevd4:prevd6:result4:MISS5:coordd1:11:D1:21:3e4:prevd6:result4:MISS5:coordd1:11:F1:21:4e4:prevd4:prevd6:result4:MISS5:coordd1:11:I1:21:6e4:prevd4:prevd4:prevd5:coordd1:11:G1:21:1e4:prevd5:coordd1:11:H1:21:1e6:result4:MISS4:prevd5:coordd1:11:C1:21:9e4:prevd5:coordd1:11:B1:21:1e4:prevd6:result4:MISS4:prevd5:coordd1:11:H1:21:8e6:result4:MISS4:prevd5:coordd1:11:I1:21:3e6:result4:MISS4:prevd5:coordd1:11:H1:21:2e4:prevd6:result4:MISS4:prevd5:coordd1:11:G1:21:1e4:prevd5:coordd1:11:J1:21:8e6:result4:MISS4:prevd4:prevd4:prevd5:coordd1:11:J1:21:4e4:prevd4:prevd4:prevd4:prevd6:result3:HIT5:coordd1:11:I1:21:5e4:prevd6:result4:MISS5:coordd1:11:A1:22:10e4:prevd6:result4:MISS5:coordd1:11:D1:21:7e4:prevd6:result3:HIT5:coordd1:11:C1:21:3e4:prevd5:coordd1:11:A1:21:5e4:prevd5:coordd1:11:I1:21:9e6:result4:MISS4:prevd5:coordd1:11:I1:21:3e4:prevd4:prevd6:result4:MISS5:coordd1:11:C1:21:3e4:prevd5:coordd1:11:A1:21:9e6:result4:MISS4:prevd5:coordd1:11:F1:21:5e6:result4:MISS4:prevd4:prevd4:prevd4:prevd4:prevd5:coordd1:11:B1:21:6e4:prevd5:coordd1:11:G1:21:2e4:prevd5:coordd1:11:I1:21:8ee6:result4:MISSe6:result4:MISSe5:coordd1:11:B1:21:4e6:result4:MISSe5:coordd1:11:C1:21:7e6:result4:MISSe6:result4:MISS5:coordd1:11:E1:21:5ee6:result4:MISS5:coordd1:11:E1:21:2eeeee5:coordd1:11:E1:21:8e6:result4:MISSe6:result4:MISSee6:result3:HITeeeee5:coordd1:11:G1:21:9e6:result4:MISSe5:coordd1:11:F1:21:8e6:result4:MISSe5:coordd1:11:H1:21:5e6:result4:MISSe6:result4:MISSe6:result4:MISS5:coordd1:11:I1:21:5ee5:coordd1:11:A1:21:6e6:result4:MISSee6:result4:MISSe5:coordd1:11:J1:21:5ee6:result4:MISSeee5:coordd1:11:A1:21:3ee6:result3:HITe6:result4:MISSee6:result4:MISSe5:coordd1:11:J1:21:6e6:result4:MISSe6:result4:MISS5:coordd1:11:F1:21:9eee6:result4:MISS5:coordd1:11:F1:21:3eeee6:result4:MISS5:coordd1:11:C1:21:9ee6:result4:MISSe5:coordd1:11:A1:21:2e6:result4:MISSeee6:result4:MISSee5:coordd1:11:B1:21:4ee5:coordd1:11:F1:22:10e6:result4:MISSee6:result3:HITe6:result4:MISSe6:result4:MISS5:coordd1:11:J1:21:8eee6:result4:MISSee5:coordd1:11:E1:21:2ee6:result4:MISSe5:coordd1:11:D1:22:10ee6:result4:MISSe6:result4:MISSee5:coordd1:11:B1:21:7ee6:result4:MISS5:coordd1:11:A1:21:6eee6:result3:HIT5:coordd1:11:D1:21:6eee6:result4:MISS5:coordd1:11:C1:21:2ee5:coordd1:11:H1:21:9eeeeee5:coordd1:11:C1:21:1eee6:result4:MISSe5:coordd1:11:G1:21:9eeee6:result3:HITe6:result4:MISSeee5:coordd1:11:E1:21:7e6:result4:MISSe"
 
 emptyMove = ValidMove ("", "") NONE Empty
 
 main = do
     let message = game1
     -- At the end, tail should be empty
-    let (parsedMoves, _) = readMove emptyMove message
-    print $ calculateScore parsedMoves
+    let (lastParsedMove, _) = readMove emptyMove message
+    print $ "A: " ++ show (calculateScoreForPlayerA lastParsedMove) ++ ", B: " ++ show (calculateScoreForPlayerB lastParsedMove)
+
+calculateScoreForPlayerA firstMove = calculateScore (prev firstMove)
+calculateScoreForPlayerB = calculateScore
 
 calculateScore :: Move -> Int
 calculateScore move = do
-    let (_, score) = getPrev move 0
+    let lastMoveScore = incrementScoreIfHit move 0
+    let (_, score) = getPrev move lastMoveScore
     score
     where
         getPrev :: Move -> Int -> (Move, Int)
-        getPrev move score =
-            if prev move /= Empty
-                then getPrev (prev move) (incrementScoreIfHit (prev move) score)
-                else (move, incrementScoreIfHit move score)
-        incrementScoreIfHit :: Move -> Int -> Int
-        incrementScoreIfHit move score =
-            if result move == HIT
-                then score + 1
-                else score
+        getPrev move score = do
+            let prevPreMove = prev (prev move)
+            if prev move /= Empty && prevPreMove /= Empty
+                then getPrev prevPreMove (incrementScoreIfHit prevPreMove score)
+            else (move, incrementScoreIfHit move score)
+
+incrementScoreIfHit :: Move -> Int -> Int
+incrementScoreIfHit move score =
+    if result move == HIT
+        then score + 1
+        else score
 
 -- Returns fully or partially parsed move and rest of the message.
 readMove :: Move -> String -> (Move, String)
@@ -124,7 +131,7 @@ readUpcommingKey message = do
         anyMessage ->
             error $ createSyntaxError "valueLength:value pair expected: " ++ message
 
--- Outer boundaries removal
+-- Outer boundaries removal. Not use any more.
 tryToRemoveOuterBoundaries :: String -> String
 tryToRemoveOuterBoundaries blob = do
     let (didRemoveFirst, b1) = removeFirstIfMatched 'd' blob
@@ -152,7 +159,7 @@ splitAtFirst :: Eq a => a -> [a] -> ([a], [a])
 splitAtFirst x = fmap (drop 1) . break (x ==)
 
 get1st (a, _) = a
-get2nd (a, b) = b
+get2nd (_, b) = b
 
 appendList :: Eq a => a -> [a] -> [a]
 appendList a = foldr (:) [a]
