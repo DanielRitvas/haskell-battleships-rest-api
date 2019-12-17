@@ -3,6 +3,9 @@ module Main where
 
 import Data.Char(digitToInt)
 import Debug.Trace
+import Network.Wreq
+import Control.Lens
+import Data.Aeson.Lens (_String, key)
 
 singleMove = "d6:result4:MISS5:coordd1:11:D1:21:4ee"
 singleMove2 = "d5:coordd1:11:A1:21:4ee"
@@ -27,9 +30,14 @@ data Move = Empty | ValidMove { coords :: Coordinates
                         , result :: ResultType
                         , prev :: Move } deriving (Show, Eq)
 
-emptyMove = ValidMove ("", "") NONE Empty
+emptyMove = ValidMove ("", "") NONE Main.Empty
 
 main = do
+    let opts = defaults & header "Accept" .~ ["application/relaxed-bencoding+nolists"]
+    r <- getWith opts "http://battleship.haskell.lt/game/late2/player/B"
+    print r
+
+main2 = do
     let message = game
     -- At the end, tail should be empty
     let (lastParsedMove, _) = readMove emptyMove message
@@ -64,7 +72,7 @@ calculateScore move = do
         getPrev :: Move -> Int -> (Move, Int)
         getPrev move score = do
             let prevPreMove = prev (prev move)
-            if prev move /= Empty && prevPreMove /= Empty
+            if prev move /= Main.Empty && prevPreMove /= Main.Empty
                 then getPrev prevPreMove (incrementScoreIfHit prevPreMove score)
             else (move, incrementScoreIfHit move score)
         incrementScoreIfHit :: Move -> Int -> Int
@@ -84,7 +92,7 @@ getNumberOfMoves move = do
         getPrev move score = do
             let prevMove = prev move
             let incrementedScore = score + 1
-            if prevMove /= Empty
+            if prevMove /= Main.Empty
                 then getPrev prevMove incrementedScore
             else (prevMove, incrementedScore)
 
@@ -109,7 +117,7 @@ validateUniqueCoords move = checkPrev move []
             else do
                 let prevPreMove = prev (prev move)
                 let appendedList = appendList currentMoveCoords usedCoords
-                if prev move /= Empty && prevPreMove /= Empty
+                if prev move /= Main.Empty && prevPreMove /= Main.Empty
                     then checkPrev prevPreMove appendedList
                 else Right True
         areCoordsInList :: Coordinates -> [Coordinates] -> Bool
