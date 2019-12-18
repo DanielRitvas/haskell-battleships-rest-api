@@ -49,6 +49,7 @@ executable fp-first-exe
     , split
     , http-conduit
     , http-types
+    , http-client
     , bytestring
     , aeson
     , lens
