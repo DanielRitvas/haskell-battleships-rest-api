@@ -8,6 +8,7 @@ import Network.Wreq
 import Control.Lens
 import Data.Aeson.Lens (_String, key)
 import Text.Read
+import Data.Char
 import Control.Concurrent
 import Move as M
 import qualified GHC.List as GHCList
@@ -16,10 +17,10 @@ import qualified Data.ByteString.Lazy.Char8 as Char8
 
 ------------------------------------------------
 -- 	  A	B C	D E F G H I J
--- 1  x . . . . . . . x x
--- 2  x . . . . . . . . x
--- 3  x . . . . . . . . x
--- 4  x . . . . . . . . .
+-- 1  x x x x . . . . x x
+-- 2  . . . . . . . . . x
+-- 3  . . . . . . . . . x
+-- 4  . . . . . . . . . .
 -- 5  . . . . . . . . . .
 -- 6  . . . . . . x x . . 
 -- 7  . . . . . x x . . .
@@ -32,9 +33,9 @@ url = "http://battleship.haskell.lt/game/"
 
 shipPositions =
     [("A", "1") :: Coordinates,
-    ("A", "2") :: Coordinates,
-    ("A", "3") :: Coordinates,
-    ("A", "4") :: Coordinates,
+    ("B", "1") :: Coordinates,
+    ("C", "1") :: Coordinates,
+    ("D", "1") :: Coordinates,
 
     ("I", "1") :: Coordinates,
     ("J", "1") :: Coordinates,
@@ -91,23 +92,54 @@ main = do
 startGameLoop :: String -> Move -> Move -> IO (Maybe Move)
 startGameLoop url myMoves enemyMoves = do
     print "5s delay before checking enemy's move..."
-    threadDelay (1000000 * 5)
+    threadDelay (1000000 * 1)
     currentEnemyMove <- getEnemyMove url enemyMoves
     case currentEnemyMove of
         Just em -> do
             let didEnemyWin = calculateScoreOfEnemy em == numberOfHitsToWin
-            myCurrentMove <- doAttack url myMoves
-            case myCurrentMove of
-                Just mcm -> do
-                    print currentEnemyMove
-                    print "---"
-                    print myCurrentMove
-                    startGameLoop url (getMyNextMove mcm) em
+            if didEnemyWin then
+                acceptDefeat em
+            else
+                case getMyNextMove myMoves of
+                    Nothing -> do
+                        print "No correct response from enemy after very last move possible."
+                        return Nothing
+                    Just nextMove -> do
+                        myCurrentMove <- doAttack url nextMove
+                        case myCurrentMove of
+                            Just mcm -> do
+                                --print currentEnemyMove
+                                --print "---"
+                                --print myCurrentMove
+                                startGameLoop url mcm em
         -- Nothing -> I won if status code 200            
 
 -- ////////////////////////////////////////////////////////////////
-getMyNextMove :: Move -> Move
-getMyNextMove myMoves = myMoves
+getMyNextMove :: Move -> Maybe Move
+getMyNextMove myMoves = do
+    let (firstCoord, secondCoord) = coords myMoves
+    let charCoord = get1stChar firstCoord
+    if charCoord < 'J' then do
+        let newCoords = ([getNextCoordsLetter charCoord], secondCoord) :: Coordinates
+        Just $ ValidMove newCoords UNKNOWN myMoves
+    -- We reached the end.
+    else if secondCoord == "10" then
+        Nothing
+    else do
+        let newCoords = ("A", getNextCoordsNumber secondCoord) :: Coordinates
+        Just $ ValidMove newCoords UNKNOWN myMoves
+
+
+
+getNextCoordsLetter 'J' = 'A'
+getNextCoordsLetter c = chr (ord c + 1)
+
+getNextCoordsNumber :: String -> String
+getNextCoordsNumber n = do
+    let num = read n :: Int
+    if num < 10 then show (num + 1)
+    else "10"
+
 
 getEnemyMove :: String -> Move -> IO (Maybe Move)
 getEnemyMove url enemyMoves = do
@@ -121,7 +153,7 @@ getEnemyMove url enemyMoves = do
         let isHit = checkIfHit (coords enemyMoveWithCoords)
         let result = if isHit then HIT else MISS
         print $ "Enemy hit " ++ show (coords enemyMoveWithCoords) ++ " result: " ++ show result
-        return (Just (ValidMove (coords enemyMoveWithCoords) result (prev enemyMoves)))
+        return (Just (ValidMove (coords enemyMoveWithCoords) result enemyMoves))
     else do
         print $ "Failed to get move: " ++ show (r ^. responseBody)
         return Nothing
@@ -134,10 +166,23 @@ doAttack :: String -> Move -> IO (Maybe Move)
 doAttack url move = do
     print $ "Attacking " ++ show (coords move) ++ "..."
     let opts = defaults & header "Content-Type" .~ [contentType]
-    r <- postWith opts url (toBS $ parseCoordinatesToBEncode (coords move))
+    r <- postWith opts url (toBS $ parseMoveResponseToBEncode move)
     let responseStatusCode = r ^. responseStatus . statusCode
     if responseStatusCode >= 200 && responseStatusCode < 300 then
         return (Just (ValidMove (coords move) UNKNOWN (prev move))) --ValidMove (coords move) UNKNOWN (prev move)
+    else do
+        print $ "Failed to attack: " ++ show (r ^. responseBody)
+        return Nothing
+
+acceptDefeat :: Move -> IO (Maybe Move)
+acceptDefeat enemyMoves = do
+    print "Sending last move..."
+    let opts = defaults & header "Content-Type" .~ [contentType]
+    m <- parseToBEncode enemyMoves
+    r <- postWith opts url (toBS m)
+    let responseStatusCode = r ^. responseStatus . statusCode
+    if responseStatusCode >= 200 && responseStatusCode < 300 then
+        return $ Just emptyMove
     else do
         print $ "Failed to attack: " ++ show (r ^. responseBody)
         return Nothing
@@ -178,10 +223,43 @@ toBS = Char8.pack
 toStr :: BS.ByteString -> String
 toStr = Char8.unpack
 
+parseToBEncode :: Move -> IO String
+parseToBEncode move = do
+    p <- parseOneMoveToBEncode move
+    print p
+    return $ "d" ++ p ++ "e"
+
+parseOneMoveToBEncode :: Move -> IO String
+parseOneMoveToBEncode move = do
+    let c = parseCoordinatesToBEncode (coords move)
+    let r = parseResultToBEncode (result move)
+    case prev move of
+        M.Empty -> return ""
+        ValidMove {} -> do
+            p <- parseOneMoveToBEncode (prev move)
+            if p == "" then -- null p
+                return $ c ++ r
+            else
+                return $ r ++ c ++ "4:prevd" ++ p ++ "e"
+
+parseMoveResponseToBEncode :: Move -> String
+parseMoveResponseToBEncode move =
+        "d" ++ parseCoordinatesToBEncode (coords move) ++ "e"
+
 parseCoordinatesToBEncode :: Coordinates -> String
 parseCoordinatesToBEncode coords = do
     let secondValueLength = length (get2nd coords)
-    "d5:coordd1:11:" ++ get1st coords ++ "1:2" ++ show secondValueLength ++ ":" ++ get2nd coords ++ "ee"
+    if secondValueLength == 0 then
+        "5:coordde"
+    else
+        "5:coordd1:11:" ++ get1st coords ++ "1:2" ++ show secondValueLength ++ ":" ++ get2nd coords ++ "e"
+
+parseResultToBEncode :: ResultType -> String
+parseResultToBEncode result =
+    case result of
+        HIT -> "6:result3:HIT"
+        MISS -> "6:result4:MISS"
+        _ -> ""
 
 getMoveFromBEncodedCoords :: String -> Move
 getMoveFromBEncodedCoords bEncodedCoords = do
@@ -431,5 +509,7 @@ get1st (a, _) = a
 get2nd :: Coordinates -> String
 get2nd (_, b) = b
 
+get1stChar :: String -> Char
+get1stChar (c:t) = c
 
 isEven n = mod n 2 == 0

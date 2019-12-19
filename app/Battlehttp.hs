@@ -26,6 +26,7 @@ safeGetUrl url move = do
     handler :: HttpException -> IO (Either String (Response LBS.ByteString))
     handler (HttpExceptionRequest _ (StatusCodeException r _)) =
       return $ Left $ BSC.unpack (r ^. responseStatus . statusMessage)
+      -- return $ Left $ show (r ^. responseBody)
 
 getEnemyMove :: URL -> Move -> IO String
 getEnemyMove url enemyMove = do
