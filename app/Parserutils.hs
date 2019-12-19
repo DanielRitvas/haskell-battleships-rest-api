@@ -9,10 +9,15 @@ module Parserutils (
     get1st,
     get2nd,
     get1stChar,
-    isEven) where
+    isEven,
+    toBS,
+    toStr) where
 
 import Move as M
+import qualified Data.ByteString.Lazy as BS
+import qualified Data.ByteString.Lazy.Char8 as Char8
 
+validateMovesForAB :: Move -> Either String Bool
 validateMovesForAB move =
     case validateUniqueCoords move of
         Left error -> Left error
@@ -52,7 +57,6 @@ appendList :: Eq a => a -> [a] -> [a]
 appendList a = foldr (:) [a]
 
 
-
 prependList :: Eq a => a -> [a] -> [a]
 prependList element list = element:list
 
@@ -63,5 +67,10 @@ get2nd (_, b) = b
 
 get1stChar :: String -> Char
 get1stChar (c:t) = c
+
+toBS :: String -> BS.ByteString
+toBS = Char8.pack
+toStr :: BS.ByteString -> String
+toStr = Char8.unpack
 
 isEven n = mod n 2 == 0

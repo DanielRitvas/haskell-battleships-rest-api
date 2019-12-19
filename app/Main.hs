@@ -73,7 +73,6 @@ main = do
             case move of
                 Just m -> startGameLoop url role m
 
--- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 startGameLoop :: String -> Role -> Move -> IO (Maybe Move)
 startGameLoop url role gameMoves = do
     print "5 seconds delay before checking enemy's move..."
@@ -93,28 +92,36 @@ startGameLoop url role gameMoves = do
                         myCurrentMove <- doAttack url nextMove
                         case myCurrentMove of
                             Just mcm -> 
-                                startGameLoop url role mcm
-        -- Nothing -> I won if status code 200            
+                                startGameLoop url role mcm        
+        Nothing -> do
+            print "It seems that something happened with enemy..."
+            return Nothing
 
-
-getByRole move role =
+getLastPlayersMoveByRole :: Move -> Role -> Move
+getLastPlayersMoveByRole move role =
     case role of
-        A -> prev move
-        B -> move
--- ////////////////////////////////////////////////////////////////
+        A -> move
+        B -> prev move
+
+
 getMyNextMove :: Move -> Role -> Maybe Move
 getMyNextMove moves role = do
-    let (firstCoord, secondCoord) = coords (getByRole moves role)
-    let charCoord = get1stChar firstCoord
-    if charCoord < 'J' then do
-        let newCoords = ([getNextCoordsLetter charCoord], secondCoord) :: Coordinates
-        Just $ ValidMove newCoords (getPreviousResult moves) moves
-    -- We reached the end.
-    else if secondCoord == "10" then
-        Nothing
-    else do
-        let newCoords = ("A", getNextCoordsNumber secondCoord) :: Coordinates
-        Just $ ValidMove newCoords (getPreviousResult moves) moves
+    let prevMove = getLastPlayersMoveByRole moves role
+    case prevMove of 
+        -- In case it's a first move for player B
+        M.Empty -> return firstMove
+        _ -> do
+            let (firstCoord, secondCoord) = coords prevMove
+            let charCoord = get1stChar firstCoord
+            if charCoord < 'J' then do
+                let newCoords = ([getNextCoordsLetter charCoord], secondCoord) :: Coordinates
+                Just $ ValidMove newCoords (getPreviousResult moves) moves
+            -- We reached the end... That's enough!
+            else if secondCoord == "10" then
+                Nothing
+            else do
+                let newCoords = ("A", getNextCoordsNumber secondCoord) :: Coordinates
+                Just $ ValidMove newCoords (getPreviousResult moves) moves
 
 getPreviousResult :: Move -> ResultType
 getPreviousResult move = do
@@ -140,6 +147,7 @@ getEnemyMove url moves = do
     if responseStatusCode >= 200 && responseStatusCode < 300 then do
         let enemyMoveData = toStr (r ^. responseBody)
         let (enemyMove, _) = readMove moves enemyMoveData
+        -- First enemy hit should have result unknown.
         print $ "Enemy hit " ++ show (coords enemyMove) ++ " result: " ++ show (result enemyMove)
         return (Just enemyMove)
     else do
@@ -189,7 +197,7 @@ acceptDefeat url move = do
 
 getUrl :: String -> Role -> String
 getUrl gameName role = url ++ gameName ++ "/player/" ++ show role
--- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
 readGameName :: IO String
 readGameName = do
     putStrLn "Enter game name:"
@@ -216,12 +224,6 @@ readNotEmptyString = do
         return Nothing
     else
         return (Just input)
--- /////////////////////////////////////////////////////////////////
-
-toBS :: String -> BS.ByteString
-toBS = Char8.pack
-toStr :: BS.ByteString -> String
-toStr = Char8.unpack
 
 parseToBEncode :: Move -> IO String
 parseToBEncode move = do
