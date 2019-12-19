@@ -1,6 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Main where
 
+import Battlehttp
 import Data.Char(digitToInt)
 import Debug.Trace
 import Network.Wreq
@@ -8,6 +9,7 @@ import Control.Lens
 import Data.Aeson.Lens (_String, key)
 import Text.Read
 import Control.Concurrent
+import Move as M
 import qualified GHC.List as GHCList
 import qualified Data.ByteString.Lazy as BS
 import qualified Data.ByteString.Lazy.Char8 as Char8
@@ -72,18 +74,6 @@ numberOfHitsToWin = 12
 
 -- game = "d4:prevd4:prevd5:coordd1:11:I1:21:1e4:prevd6:result4:MISS5:coordd1:11:B1:21:7e4:prevd5:coordd1:11:C1:21:6e6:result4:MISS4:prevd4:prevd4:prevd4:prevd5:coordd1:11:A1:21:6e6:result4:MISS4:prevd5:coordd1:11:D1:21:4e6:result4:MISS4:prevd4:prevd4:prevd6:result4:MISS5:coordd1:11:C1:21:3e4:prevd5:coordd1:11:I1:21:5e4:prevd6:result4:MISS5:coordd1:11:C1:21:1e4:prevd6:result4:MISS5:coordd1:11:C1:21:8e4:prevd6:result4:MISS4:prevd5:coordd1:11:A1:21:9e6:result4:MISS4:prevd5:coordd1:11:F1:21:1e6:result4:MISS4:prevd6:result4:MISS5:coordd1:11:F1:21:1e4:prevd6:result4:MISS4:prevd5:coordd1:11:F1:21:2e6:result3:HIT4:prevd6:result4:MISS5:coordd1:11:J1:21:3e4:prevd4:prevd4:prevd5:coordd1:11:E1:21:2e6:result4:MISS4:prevd5:coordd1:11:D1:21:3e4:prevd5:coordd1:11:B1:22:10e4:prevd4:prevd4:prevd4:prevd5:coordd1:11:I1:21:4e4:prevd6:result4:MISS5:coordd1:11:G1:21:8e4:prevd5:coordd1:11:J1:21:3e4:prevd4:prevd6:result4:MISS5:coordd1:11:J1:21:7e4:prevd6:result4:MISS4:prevd4:prevd4:prevd6:result4:MISS4:prevd5:coordd1:11:H1:21:7e6:result3:HIT4:prevd4:prevd5:coordd1:11:I1:21:2e4:prevd6:result4:MISS4:prevd6:result4:MISS5:coordd1:11:E1:21:4e4:prevd6:result4:MISS5:coordd1:11:E1:21:6e4:prevd6:result4:MISS4:prevd4:prevd4:prevd4:prevd6:result4:MISS4:prevd6:result4:MISS5:coordd1:11:I1:21:3e4:prevd5:coordd1:11:F1:21:6e4:prevd4:prevd4:prevd4:prevd5:coordd1:11:D1:21:4e6:result4:MISS4:prevd4:prevd6:result4:MISS4:prevd6:result4:MISS4:prevd5:coordd1:11:F1:21:8e4:prevd5:coordd1:11:G1:21:5e4:prevd6:result4:MISS5:coordd1:11:J1:21:6e4:prevd5:coordd1:11:D1:22:10e4:prevd4:prevd4:prevd6:result4:MISS5:coordd1:11:E1:21:7e4:prevd5:coordd1:11:H1:21:8e6:result3:HIT4:prevd5:coordd1:11:I1:22:10e4:prevd4:prevd5:coordd1:11:H1:21:1e4:prevd5:coordd1:11:H1:21:5e4:prevd5:coordd1:11:J1:21:5e4:prevd4:prevd6:result4:MISS4:prevd5:coordd1:11:A1:21:2e4:prevd6:result4:MISS5:coordd1:11:D1:21:9e4:prevd6:result4:MISS4:prevd6:result4:MISS4:prevd4:prevd5:coordd1:11:G1:21:7e6:result4:MISS4:prevd6:result4:MISS5:coordd1:11:A1:21:6e4:prevd6:result4:MISS4:prevd5:coordd1:11:E1:21:5e6:result4:MISS4:prevd4:prevd5:coordd1:11:J1:21:5e6:result4:MISS4:prevd6:result3:HIT5:coordd1:11:I1:21:5e4:prevd5:coordd1:11:F1:21:7e6:result4:MISS4:prevd5:coordd1:11:G1:21:3e6:result4:MISS4:prevd4:prevd4:prevd5:coordd1:11:E1:21:4e6:result4:MISS4:prevd6:result4:MISS4:prevd4:prevd5:coordd1:11:D1:21:7e4:prevd4:prevd4:prevd5:coordd1:11:D1:21:2e6:result4:MISS4:prevd6:result3:HIT5:coordd1:11:E1:21:3e4:prevd4:prevd6:result4:MISS4:prevd6:result4:MISS5:coordd1:11:G1:22:10e4:prevd5:coordd1:11:H1:21:4e4:prevd4:prevd4:prevd4:prevd6:result4:MISS4:prevd6:result4:MISS4:prevd6:result4:MISS4:prevd5:coordd1:11:C1:21:4e6:result4:MISS4:prevd4:prevd6:result3:HIT4:prevd4:prevd4:prevd6:result4:MISS5:coordd1:11:H1:21:2e4:prevd5:coordd1:11:E1:21:1e6:result4:MISS4:prevd6:result4:MISS4:prevd5:coordd1:11:C1:21:5e4:prevd4:prevd5:coordd1:11:E1:21:7e4:prevd5:coordd1:11:A1:21:2e6:result4:MISS4:prevd4:prevd6:result4:MISS4:prevd4:prevd6:result4:MISS5:coordd1:11:I1:21:4e4:prevd6:result3:HIT4:prevd5:coordd1:11:C1:22:10ee5:coordd1:11:A1:21:7eee5:coordd1:11:D1:21:3e6:result4:MISSe5:coordd1:11:J1:21:8ee6:result4:MISS5:coordd1:11:J1:21:9eee6:result3:HITe6:result3:HIT5:coordd1:11:G1:22:10ee6:result4:MISSe5:coordd1:11:F1:21:2eeee5:coordd1:11:I1:21:1e6:result4:MISSe6:result4:MISS5:coordd1:11:J1:21:2ee5:coordd1:11:I1:21:8ee5:coordd1:11:B1:21:1e6:result3:HITee5:coordd1:11:F1:21:4ee5:coordd1:11:J1:21:6ee5:coordd1:11:B1:21:9ee5:coordd1:11:C1:21:7e6:result3:HITe5:coordd1:11:H1:21:6e6:result4:MISSe6:result3:HIT5:coordd1:11:E1:22:10ee6:result4:MISSee5:coordd1:11:G1:21:6ee5:coordd1:11:C1:21:2e6:result3:HITeee5:coordd1:11:A1:21:3e6:result4:MISSe6:result3:HIT5:coordd1:11:A1:21:8ee6:result4:MISSe5:coordd1:11:G1:21:8e6:result4:MISSe5:coordd1:11:E1:21:9eee5:coordd1:11:I1:21:9e6:result4:MISSe5:coordd1:11:H1:21:7e6:result3:HITeeeee6:result4:MISS5:coordd1:11:G1:21:4eee5:coordd1:11:F1:21:9eeee6:result3:HIT5:coordd1:11:J1:22:10ee5:coordd1:11:E1:21:1ee5:coordd1:11:A1:21:4eee6:result4:MISSe5:coordd1:11:I1:21:7ee6:result4:MISS5:coordd1:11:G1:21:2ee6:result4:MISSe6:result4:MISSe6:result4:MISSe5:coordd1:11:D1:21:1e6:result4:MISSe6:result4:MISSeee5:coordd1:11:F1:21:8e6:result4:MISSe6:result4:MISS5:coordd1:11:E1:21:6ee6:result4:MISSee6:result4:MISSe6:result4:MISSe5:coordd1:11:B1:21:1ee5:coordd1:11:B1:21:7ee6:result4:MISS5:coordd1:11:F1:21:4eee6:result4:MISS5:coordd1:11:B1:21:2ee5:coordd1:11:A1:21:5e6:result3:HITe5:coordd1:11:H1:21:2e6:result3:HITe6:result3:HITee5:coordd1:11:H1:21:3ee6:result4:MISS5:coordd1:11:G1:21:4ee6:result3:HIT5:coordd1:11:J1:21:7ee5:coordd1:11:A1:21:3e6:result4:MISSe5:coordd1:11:G1:21:9eeee5:coordd1:11:C1:21:6ee6:result4:MISSe6:result4:MISS5:coordd1:11:F1:21:6eee5:coordd1:11:C1:21:9ee5:coordd1:11:C1:21:8e6:result3:HITe6:result4:MISS5:coordd1:11:F1:21:5ee5:coordd1:11:C1:21:5eee6:result4:MISS5:coordd1:11:G1:21:1ee6:result4:MISSee6:result4:MISSe5:coordd1:11:A1:21:8e6:result4:MISSe5:coordd1:11:H1:21:4e6:result4:MISSe6:result4:MISS5:coordd1:11:B1:21:8ee6:result4:MISSe6:result4:MISSee5:coordd1:11:D1:21:6e6:result4:MISSe5:coordd1:11:H1:22:10e6:result4:MISSeee5:coordd1:11:A1:21:9eeeee5:coordd1:11:B1:21:2eeee6:result4:MISSee6:result4:MISS5:coordd1:11:B1:21:3ee5:coordd1:11:D1:22:10e6:result3:HITeee5:coordd1:11:B1:21:9e6:result4:MISSe6:result3:HIT5:coordd1:11:A1:21:7ee5:coordd1:11:D1:21:5e6:result4:MISSeee6:result3:HITe6:result3:HIT5:coordd1:11:D1:21:6ee5:coordd1:11:B1:22:10e6:result4:MISSe"
 
-type Coordinates = (String, String)
-data ResultType = HIT | MISS | UNKNOWN | NONE deriving (Eq,Ord,Enum,Show)
-
-data Move = Empty | ValidMove { coords :: Coordinates
-                        , result :: ResultType
-                        , prev :: Move } deriving (Show, Eq)
-
-data Role = A | B deriving (Eq,Ord,Enum,Show)
-
-emptyMove = ValidMove ("", "") NONE Main.Empty
-firstMove = ValidMove ("A", "1") UNKNOWN Main.Empty
-
 main = do
     gameName <- readGameName
     role <- readRole
@@ -91,8 +81,8 @@ main = do
     print $ "You are player: " ++ show role
     let url = getUrl gameName role
     case role of
-        B -> startGameLoop url firstMove emptyMove
-        A -> do
+        M.B -> startGameLoop url firstMove emptyMove
+        M.A -> do
             move <- doFirstAttack url
             case move of
                 Just m -> startGameLoop url m emptyMove
@@ -195,7 +185,7 @@ parseCoordinatesToBEncode coords = do
 
 getMoveFromBEncodedCoords :: String -> Move
 getMoveFromBEncodedCoords bEncodedCoords = do
-    let enemyMove = ValidMove ("", "") UNKNOWN Main.Empty
+    let enemyMove = ValidMove ("", "") UNKNOWN M.Empty
     let (move, _) = readMove enemyMove bEncodedCoords
     move
 
@@ -249,7 +239,7 @@ calculateScore move = do
         getPrev :: Move -> Int -> (Move, Int)
         getPrev move score = do
             let prevPreMove = prev (prev move)
-            if prev move /= Main.Empty && prevPreMove /= Main.Empty
+            if prev move /= M.Empty && prevPreMove /= M.Empty
                 then getPrev prevPreMove (incrementScoreIfHit prevPreMove score)
             else (move, incrementScoreIfHit move score)
         incrementScoreIfHit :: Move -> Int -> Int
@@ -269,7 +259,7 @@ getNumberOfMoves move = do
         getPrev move score = do
             let prevMove = prev move
             let incrementedScore = score + 1
-            if prevMove /= Main.Empty
+            if prevMove /= M.Empty
                 then getPrev prevMove incrementedScore
             else (prevMove, incrementedScore)
 
@@ -294,7 +284,7 @@ validateUniqueCoords move = checkPrev move []
             else do
                 let prevPreMove = prev (prev move)
                 let appendedList = appendList currentMoveCoords usedCoords
-                if prev move /= Main.Empty && prevPreMove /= Main.Empty
+                if prev move /= M.Empty && prevPreMove /= M.Empty
                     then checkPrev prevPreMove appendedList
                 else Right True
         areCoordsInList :: Coordinates -> [Coordinates] -> Bool
