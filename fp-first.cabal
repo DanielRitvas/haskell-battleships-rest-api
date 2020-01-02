@@ -60,6 +60,7 @@ executable fp-first-exe
     , lens
     , lens-aeson
     , wreq
+    , yesod
   default-language: Haskell2010
 
 test-suite fp-first-test

@@ -1,4 +1,6 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeFamilies, QuasiQuotes, MultiParamTypeClasses,
+             TemplateHaskell, OverloadedStrings #-}
+
 module Main where
 
 import Battlehttp
@@ -15,6 +17,9 @@ import Parserutils
 import qualified GHC.List as GHCList
 import qualified Data.ByteString.Lazy as BS
 import qualified Data.ByteString.Lazy.Char8 as Char8
+
+import Data.IORef 
+import Yesod
 
 ------------------------------------------------
 -- 	  A	B C	D E F G H I J
@@ -60,7 +65,52 @@ numberOfHitsToWin = 20
 contentType = "application/relaxed-bencoding+nolists"
 url = "http://battleship.haskell.lt/game/"
 
-main = do
+
+-------------------------------------------
+data GamesData = GamesData {
+    counter :: IORef Integer,
+    move :: IORef Move -- (1)
+}
+
+mkYesod "GamesData" [parseRoutes|
+/ CounterRr GET -- (4)
+|]
+
+instance Yesod GamesData
+
+-- incCount :: (Num a, Show a) => IORef a -> IO a
+-- incCount counter = atomicModifyIORef counter (\c -> (c+1, c)) -- (6)
+
+-- getCounterR :: Handler Html
+-- getCounterR = do 
+--     yesod <- getYesod -- (5)
+--     count <- liftIO $ incCount $ counter yesod -- (7)
+--     liftIO $ putStrLn $ "Sending Response " ++ show count -- (8)
+--     defaultLayout [whamlet|Hello World #{count}|] -- (9)
+
+getCounterRr :: Handler String
+getCounterRr = do 
+    -- yesod <- getYesod -- (5)
+    -- movey <- readIORef $ move yesod -- (7)
+    -- liftIO $ putStrLn $ "Sending Response " ++ show count -- (8)
+    -- defaultLayout [whamlet|Hello World #{count}|] -- (9)
+    yesod <- getYesod
+    mov <- liftIO $ readIORef $ move yesod
+    bencode <- liftIO $ parseToBEncode mov
+    return bencode
+
+startGameServer = do
+    counter <- newIORef 0 -- (2)
+    emptyMoveRef <- newIORef M.someGameMoves
+    warp 3000 $ GamesData { 
+        counter = counter,
+        move = emptyMoveRef
+    } -- (3)
+
+-------------------------------------------
+main = startGameServer
+
+startClientGame = do
     gameName <- readGameName
     role <- readRole
     print $ "Name of the game: " ++ gameName
@@ -76,7 +126,8 @@ main = do
 startGameLoop :: String -> Role -> Move -> IO (Maybe Move)
 startGameLoop url role gameMoves = do
     print "5 seconds delay before checking enemy's move..."
-    threadDelay (1000000 * 5)
+    -- threadDelay (1000000 * 5)
+    print gameMoves
     currentEnemyMove <- getEnemyMove url gameMoves
     case currentEnemyMove of
         Just em -> do
@@ -96,6 +147,7 @@ startGameLoop url role gameMoves = do
         Nothing -> do
             print "It seems that something happened with enemy..."
             return Nothing
+
 
 getLastPlayersMoveByRole :: Move -> Role -> Move
 getLastPlayersMoveByRole move role =
@@ -122,6 +174,8 @@ getMyNextMove moves role = do
             else do
                 let newCoords = ("A", getNextCoordsNumber secondCoord) :: Coordinates
                 Just $ ValidMove newCoords (getPreviousResult moves) moves
+
+
 
 getPreviousResult :: Move -> ResultType
 getPreviousResult move = do
