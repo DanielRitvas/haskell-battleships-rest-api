@@ -1,5 +1,6 @@
+{-# LANGUAGE TupleSections #-}
 {-# LANGUAGE TypeFamilies, QuasiQuotes, MultiParamTypeClasses,
-             TemplateHaskell, OverloadedStrings #-}
+             TemplateHaskell, OverloadedStrings, ViewPatterns #-}
 
 module Main where
 
@@ -19,7 +20,10 @@ import qualified Data.ByteString.Lazy as BS
 import qualified Data.ByteString.Lazy.Char8 as Char8
 
 import Data.IORef 
+import Data.Text (Text)
 import Yesod
+import qualified Network.Wai as Wai
+import qualified Network.HTTP.Types.Status as HTTPStatus
 
 ------------------------------------------------
 -- 	  A	B C	D E F G H I J
@@ -68,48 +72,195 @@ url = "http://battleship.haskell.lt/game/"
 
 -------------------------------------------
 data GamesData = GamesData {
-    counter :: IORef Integer,
-    move :: IORef Move -- (1)
+    move :: IORef Move,
+    currentMove :: IORef Role,
+    playerADidMove :: IORef Bool,
+    -- playerBReadMove :: IORef Bool,
+    -- playerBDidMove :: IORef Bool,
+    playerAReadMove :: IORef Bool
 }
 
 mkYesod "GamesData" [parseRoutes|
-/ CounterRr GET -- (4)
+/#Text GameR GET POST
 |]
 
 instance Yesod GamesData
 
--- incCount :: (Num a, Show a) => IORef a -> IO a
--- incCount counter = atomicModifyIORef counter (\c -> (c+1, c)) -- (6)
+-- d5:coordd1:11:A1:21:1ee
+getGameR :: Text -> Handler String 
+getGameR gameId = do
+    allowGet <- isTimeForPlayerAToGetMoveOfB
+    if allowGet then do
+        moveRef <- fmap move getYesod
+        currentMove <- liftIO $ readIORef moveRef
+        setStateAfterAReadMove
+        liftIO $ print "====[ GET curret move ]==============="
+        liftIO $ print currentMove
+        liftIO $ print "====[ GET curret move as bEncode ]===="
+        parseco <- liftIO $ parseToBEncode currentMove
+        liftIO $ print parseco
+        return parseco
+    else 
+        return "It's not time to GET another move"
 
--- getCounterR :: Handler Html
--- getCounterR = do 
---     yesod <- getYesod -- (5)
---     count <- liftIO $ incCount $ counter yesod -- (7)
---     liftIO $ putStrLn $ "Sending Response " ++ show count -- (8)
---     defaultLayout [whamlet|Hello World #{count}|] -- (9)
 
-getCounterRr :: Handler String
-getCounterRr = do 
-    -- yesod <- getYesod -- (5)
-    -- movey <- readIORef $ move yesod -- (7)
-    -- liftIO $ putStrLn $ "Sending Response " ++ show count -- (8)
-    -- defaultLayout [whamlet|Hello World #{count}|] -- (9)
-    yesod <- getYesod
-    mov <- liftIO $ readIORef $ move yesod
-    bencode <- liftIO $ parseToBEncode mov
-    return bencode
+postGameR :: Text -> Handler String 
+postGameR gameId = do
+    allowPost <- isMoveOfPlayerA
+    if allowPost then do
+        req <- reqWaiRequest <$> getRequest
+        body <- liftIO $ Wai.lazyRequestBody req
+        moveRef <- fmap move getYesod
+        currentMove <- liftIO $ readIORef moveRef
+
+        liftIO $ print "====[ At first in memory ]============"
+        liftIO $ print currentMove
+        liftIO $ print "====[ Body ]=========================="
+        liftIO $ print $ toStr body
+
+        let (newMove, opce) = readMove currentMove (toStr body)
+
+        liftIO $ print "====[ New move ]======================"
+        liftIO $ print newMove
+        liftIO $ print "====[ Tail ]=========================="
+        liftIO $ print opce
+
+        liftIO $ atomicModifyIORef moveRef (newMove,)
+        setStateAfterMoveOfPlayerA
+        nextMoveOfB <- liftIO $ doNextMoveForPlayerB newMove
+        case nextMoveOfB of 
+            Just bMove -> do
+                liftIO $ atomicModifyIORef moveRef (bMove,)
+                currentMove69 <- liftIO $ readIORef moveRef
+                liftIO $ print "====[ After update, last move is B ]=="
+                liftIO $ print currentMove69
+                setStateAfterMoveOfPlayerB
+                return ""
+            Nothing -> do 
+                liftIO $ print "Player B can't do another move"
+                setStateAfterMoveOfPlayerB
+                return ""
+
+        -- liftIO $ parseToBEncode currentMoveAfterUpdate
+    else 
+        -- return "It's not time to do another move"
+        return "It's not time to POST another move"
+
+doNextMoveForPlayerB :: Move -> IO (Maybe Move)
+doNextMoveForPlayerB lastMoveOfPlayerA = do
+    let didEnemyWin = calculateScoreOfEnemy lastMoveOfPlayerA B == numberOfHitsToWin
+    if didEnemyWin then do
+        -- Move Of Dramatic Failure
+        print "I lost :(. Letting enemy know about it..."
+        return $ Just $ ValidMove ("", "") HIT (prev lastMoveOfPlayerA)
+    else
+        -- TODO: By using A we return bad move at first, fix it.
+        case getMyNextMove lastMoveOfPlayerA B of
+            Nothing -> do
+                print "No correct response from enemy after very last move possible."
+                return Nothing
+            Just nextMove -> return $ Just nextMove
+
+isMoveOfPlayerA :: Handler Bool
+isMoveOfPlayerA = do
+    currentMoveRef <- fmap currentMove getYesod
+    playerADidMoveRef <- fmap playerADidMove getYesod
+
+    currentMove <- liftIO $ readIORef currentMoveRef
+    playerADidMove <- liftIO $ readIORef playerADidMoveRef
+
+    return (currentMove == A && not playerADidMove)
+
+
+
+isTimeForPlayerAToGetMoveOfB :: Handler Bool
+isTimeForPlayerAToGetMoveOfB = do
+    currentMoveRef' <- fmap currentMove getYesod
+    playerADidMoveRef <- fmap playerADidMove getYesod
+    playerAReadMoveRef <- fmap playerADidMove getYesod
+
+    currentMove <- liftIO $ readIORef currentMoveRef'
+    playerADidMove <- liftIO $ readIORef playerADidMoveRef
+    playerAReadMove <- liftIO $ readIORef playerAReadMoveRef
+
+    return (currentMove == A && not playerADidMove && not playerAReadMove)
+
+
+
+setStateAfterAReadMove :: Handler ()
+setStateAfterAReadMove = do
+    playerAReadMoveRef <- fmap playerAReadMove getYesod
+    liftIO $ atomicModifyIORef playerAReadMoveRef (True,)
+    return ()
+
+
+setStateAfterMoveOfPlayerA :: Handler ()
+setStateAfterMoveOfPlayerA = do
+    currentMoveRef <- fmap currentMove getYesod
+    playerADidMoveRef <- fmap playerADidMove getYesod
+
+    liftIO $ atomicModifyIORef currentMoveRef (B,)
+    liftIO $ atomicModifyIORef playerADidMoveRef (True,)
+
+    return ()
+
+
+
+setStateAfterMoveOfPlayerB :: Handler ()
+setStateAfterMoveOfPlayerB = do
+    currentMoveRef <- fmap currentMove getYesod
+    playerADidMoveRef <- fmap playerADidMove getYesod
+    playerAReadMoveRef <- fmap playerAReadMove getYesod
+
+    liftIO $ atomicModifyIORef currentMoveRef (A,)
+    liftIO $ atomicModifyIORef playerADidMoveRef (False,)
+    liftIO $ atomicModifyIORef playerAReadMoveRef (False,)
+
+    return ()
+
+
 
 startGameServer = do
-    counter <- newIORef 0 -- (2)
-    emptyMoveRef <- newIORef M.someGameMoves
-    warp 3000 $ GamesData { 
-        counter = counter,
-        move = emptyMoveRef
-    } -- (3)
+    emptyMoveRef <- newIORef M.emptyMove
+    currentMoveRef <- newIORef A
+    playerADidMoveRef <- newIORef False
+    -- playerBReadMoveRef <- newIORef False
+    -- playerBDidMoveRef <- newIORef False
+    playerAReadMoveRef <- newIORef False
+    warp 3000 $ GamesData {
+        move = emptyMoveRef,
+        currentMove = currentMoveRef,
+        playerADidMove = playerADidMoveRef,
+        -- playerBReadMove = playerBReadMoveRef,
+        -- playerBDidMove = playerBDidMoveRef,
+        playerAReadMove = playerAReadMoveRef
+    }
 
 -------------------------------------------
-main = startGameServer
+main = do
+    instanceType <- readInstanceType
+    if instanceType == 1 then do
+        _ <- startClientGameWithRole A "http://localhost:3000"
+        return ()
+    else if instanceType == 2 then 
+        startGameServer
+    else do
+        _ <- startClientGame
+        return ()
 
+
+startClientGameWithRole :: Role -> String -> IO (Maybe Move) 
+startClientGameWithRole role serverUrl = do
+    gameName' <- readGameName
+    print $ "Name of the game: " ++ gameName'
+    let url = serverUrl ++ "/" ++ gameName'
+    case role of
+        M.A -> do
+            move <- doFirstAttack url
+            case move of
+                Just m -> startGameLoop url role m
+
+startClientGame :: IO (Maybe Move)
 startClientGame = do
     gameName <- readGameName
     role <- readRole
@@ -134,7 +285,7 @@ startGameLoop url role gameMoves = do
             let didEnemyWin = calculateScoreOfEnemy em role == numberOfHitsToWin
             if didEnemyWin then
                 acceptDefeat url em
-            else 
+            else
                 case getMyNextMove em role of
                     Nothing -> do
                         print "No correct response from enemy after very last move possible."
@@ -161,7 +312,7 @@ getMyNextMove moves role = do
     let prevMove = getLastPlayersMoveByRole moves role
     case prevMove of 
         -- In case it's a first move for player B
-        M.Empty -> return firstMove
+        M.Empty -> return $ ValidMove (coords firstMove) (getPreviousResult moves) moves
         _ -> do
             let (firstCoord, secondCoord) = coords prevMove
             let charCoord = get1stChar firstCoord
@@ -210,7 +361,7 @@ getEnemyMove url moves = do
 
 doFirstAttack :: String -> IO (Maybe Move)
 doFirstAttack url = do
-    print $ "FIrst attack " ++ show (coords firstMove) ++ "..."
+    print $ "First attack " ++ show (coords firstMove) ++ "..."
     p <- parseToBEncode firstMove
     let firstCoords = p ++ "e"
     let opts = defaults & header "Content-Type" .~ [contentType]
@@ -271,6 +422,21 @@ readRole = do
             | otherwise -> putStrLn "Role only can be A or B" >> readRole
         Nothing -> putStrLn "Name can't be empty" >> readRole
 
+readInstanceType :: IO Int
+readInstanceType = do
+    putStrLn "Select type for this instance:"
+    putStrLn "1 - client (player A)"
+    putStrLn "2 - game server"
+    putStrLn "Any other key - basic client to play another client"
+    role <- readNotEmptyString
+    case role of
+        Just r
+            | r == "1" -> return 1
+            | r == "2" -> return 2
+            | otherwise -> return 3
+            -- | otherwise -> putStrLn "Type only can be 1 or 2" >> readInstanceType
+        Nothing -> putStrLn "Type can't be empty" >> readInstanceType
+
 readNotEmptyString :: IO (Maybe String)
 readNotEmptyString = do
     input <- getLine
@@ -327,18 +493,6 @@ checkIfHit coords = do
         Nothing -> False
 
 -- '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
--- main = do
---     let message = game
---     -- At the end, tail should be empty
---     let (lastParsedMove, _) = readMove emptyMove message
---     case validateMovesForAB lastParsedMove of
---         Right _ -> do
---             let numberOfMoves = show (getNumberOfMoves lastParsedMove)
---             print $ "Number of moves: " ++ numberOfMoves
---             let (scoreA, scoreB) = calculateScoreForPlayersAB lastParsedMove
---             print $ "Score A: " ++ show scoreA ++ " B: " ++ show scoreB
---         Left errorMessage -> error errorMessage
 
 calculateScoreOfEnemy :: Move -> Role -> Int
 calculateScoreOfEnemy move role = do
