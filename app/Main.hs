@@ -19,11 +19,14 @@ import qualified GHC.List as GHCList
 import qualified Data.ByteString.Lazy as BS
 import qualified Data.ByteString.Lazy.Char8 as Char8
 
-import Data.IORef 
+import Data.IORef
 import Data.Text (Text)
-import Yesod
+import qualified Data.Text as DT
+import Yesod hiding (insert)
 import qualified Network.Wai as Wai
 import qualified Network.HTTP.Types.Status as HTTPStatus
+import Data.Map (Map, fromList, lookup, insert, toList)
+import Prelude hiding (lookup, insert)
 
 ------------------------------------------------
 -- 	  A	B C	D E F G H I J
@@ -68,84 +71,96 @@ shipPositions =
 numberOfHitsToWin = 20
 contentType = "application/relaxed-bencoding+nolists"
 url = "http://battleship.haskell.lt/game/"
+localUrl = "http://localhost:3000"
 
 
--------------------------------------------
+data SingleGamesData = SingleGamesData {
+    move :: Move,
+    currentMove :: Role,
+    playerADidMove :: Bool,
+    playerAReadMove :: Bool
+}
+
+type GamesDataMap = Map String SingleGamesData
+
 data GamesData = GamesData {
-    move :: IORef Move,
-    currentMove :: IORef Role,
-    playerADidMove :: IORef Bool,
-    -- playerBReadMove :: IORef Bool,
-    -- playerBDidMove :: IORef Bool,
-    playerAReadMove :: IORef Bool
+    gamesMap :: IORef GamesDataMap
 }
 
 mkYesod "GamesData" [parseRoutes|
+/currentGames/list CurrentGameListR GET
+/currentGames/status/#Text CurrentGameStatusR GET
 /#Text GameR GET POST
 |]
 
 instance Yesod GamesData
 
--- d5:coordd1:11:A1:21:1ee
-getGameR :: Text -> Handler String 
+-- get list of game names
+getCurrentGameListR :: Handler String
+getCurrentGameListR = do
+    -- Example: Applicative Function fmap
+    gamesDataMapRef <- fmap gamesMap getYesod
+    gamesDataMap' <- liftIO $ readIORef gamesDataMapRef
+    return $ show (map fst (toList gamesDataMap'))
+
+getCurrentGameStatusR :: Text -> Handler String
+getCurrentGameStatusR gameId = do
+    gamesDataMapRef <- fmap gamesMap getYesod
+    gamesDataMap' <- liftIO $ readIORef gamesDataMapRef
+    let gameIdStr = DT.unpack gameId
+    case lookup gameIdStr gamesDataMap' of
+        Nothing -> return $ "No active game with name " ++ gameIdStr
+        Just dataMap -> liftIO $ parseToBEncode (move dataMap)
+
+getGameR :: Text -> Handler String
 getGameR gameId = do
-    allowGet <- isTimeForPlayerAToGetMoveOfB
+    let gameIdStr = DT.unpack gameId
+    allowGet <- isTimeForPlayerAToGetMoveOfB gameIdStr
     if allowGet then do
-        moveRef <- fmap move getYesod
-        currentMove <- liftIO $ readIORef moveRef
-        setStateAfterAReadMove
-        liftIO $ print "====[ GET curret move ]==============="
-        liftIO $ print currentMove
-        liftIO $ print "====[ GET curret move as bEncode ]===="
-        parseco <- liftIO $ parseToBEncode currentMove
-        liftIO $ print parseco
-        return parseco
-    else 
-        return "It's not time to GET another move"
+        gameData <- getGameDataById gameIdStr
+        setStateAfterAReadMove gameIdStr
+        liftIO $ parseToBEncode (move gameData)
+    else
+        return $ error "It's not time to GET another move"
 
 
-postGameR :: Text -> Handler String 
+postGameR :: Text -> Handler String
 postGameR gameId = do
-    allowPost <- isMoveOfPlayerA
+    let gameIdStr = DT.unpack gameId
+    allowPost <- isMoveOfPlayerA gameIdStr
     if allowPost then do
+        -- Example Applicative Function <$> which is a infix synonym for fmap
         req <- reqWaiRequest <$> getRequest
         body <- liftIO $ Wai.lazyRequestBody req
-        moveRef <- fmap move getYesod
-        currentMove <- liftIO $ readIORef moveRef
+        gameData <- getGameDataById gameIdStr
+        let (newMove, opce) = readMove (move gameData) (toStr body)
+        setGameDataById gameIdStr (SingleGamesData {
+            move = newMove,
+            currentMove = currentMove gameData,
+            playerADidMove = playerADidMove gameData,
+            playerAReadMove = playerAReadMove gameData
+        })
+        setStateAfterMoveOfPlayerA gameIdStr
 
-        liftIO $ print "====[ At first in memory ]============"
-        liftIO $ print currentMove
-        liftIO $ print "====[ Body ]=========================="
-        liftIO $ print $ toStr body
-
-        let (newMove, opce) = readMove currentMove (toStr body)
-
-        liftIO $ print "====[ New move ]======================"
-        liftIO $ print newMove
-        liftIO $ print "====[ Tail ]=========================="
-        liftIO $ print opce
-
-        liftIO $ atomicModifyIORef moveRef (newMove,)
-        setStateAfterMoveOfPlayerA
         nextMoveOfB <- liftIO $ doNextMoveForPlayerB newMove
-        case nextMoveOfB of 
+        case nextMoveOfB of
             Just bMove -> do
-                liftIO $ atomicModifyIORef moveRef (bMove,)
-                currentMove69 <- liftIO $ readIORef moveRef
-                liftIO $ print "====[ After update, last move is B ]=="
-                liftIO $ print currentMove69
-                setStateAfterMoveOfPlayerB
+                setGameDataById gameIdStr (SingleGamesData {
+                    move = bMove,
+                    currentMove = currentMove gameData,
+                    playerADidMove = playerADidMove gameData,
+                    playerAReadMove = playerAReadMove gameData
+                })
+                setStateAfterMoveOfPlayerB gameIdStr
                 return ""
-            Nothing -> do 
-                liftIO $ print "Player B can't do another move"
-                setStateAfterMoveOfPlayerB
+            Nothing -> do
+                liftIO $ error "Player B can't do another move"
+                setStateAfterMoveOfPlayerB gameIdStr
                 return ""
+    else
+        return $ error "It's not time to POST another move"
 
-        -- liftIO $ parseToBEncode currentMoveAfterUpdate
-    else 
-        -- return "It's not time to do another move"
-        return "It's not time to POST another move"
-
+-- Example: Monad Maybe
 doNextMoveForPlayerB :: Move -> IO (Maybe Move)
 doNextMoveForPlayerB lastMoveOfPlayerA = do
     let didEnemyWin = calculateScoreOfEnemy lastMoveOfPlayerA B == numberOfHitsToWin
@@ -154,106 +169,115 @@ doNextMoveForPlayerB lastMoveOfPlayerA = do
         print "I lost :(. Letting enemy know about it..."
         return $ Just $ ValidMove ("", "") HIT (prev lastMoveOfPlayerA)
     else
-        -- TODO: By using A we return bad move at first, fix it.
         case getMyNextMove lastMoveOfPlayerA B of
             Nothing -> do
                 print "No correct response from enemy after very last move possible."
                 return Nothing
             Just nextMove -> return $ Just nextMove
 
-isMoveOfPlayerA :: Handler Bool
-isMoveOfPlayerA = do
-    currentMoveRef <- fmap currentMove getYesod
-    playerADidMoveRef <- fmap playerADidMove getYesod
-
-    currentMove <- liftIO $ readIORef currentMoveRef
-    playerADidMove <- liftIO $ readIORef playerADidMoveRef
-
-    return (currentMove == A && not playerADidMove)
+isMoveOfPlayerA :: String -> Handler Bool
+isMoveOfPlayerA gameId = do
+    gameData <- getGameDataById gameId
+    return (currentMove gameData == A && not (playerADidMove gameData))
 
 
-
-isTimeForPlayerAToGetMoveOfB :: Handler Bool
-isTimeForPlayerAToGetMoveOfB = do
-    currentMoveRef' <- fmap currentMove getYesod
-    playerADidMoveRef <- fmap playerADidMove getYesod
-    playerAReadMoveRef <- fmap playerADidMove getYesod
-
-    currentMove <- liftIO $ readIORef currentMoveRef'
-    playerADidMove <- liftIO $ readIORef playerADidMoveRef
-    playerAReadMove <- liftIO $ readIORef playerAReadMoveRef
-
-    return (currentMove == A && not playerADidMove && not playerAReadMove)
+isTimeForPlayerAToGetMoveOfB :: String -> Handler Bool
+isTimeForPlayerAToGetMoveOfB gameId = do
+    gameData <- getGameDataById gameId
+    return (currentMove gameData == A
+        && not (playerADidMove gameData)
+        && not (playerAReadMove gameData))
 
 
+setStateAfterAReadMove :: String -> Handler ()
+setStateAfterAReadMove gameId = do
+    gameData <- getGameDataById gameId
+    setGameDataById gameId (SingleGamesData {
+        playerAReadMove = True,
 
-setStateAfterAReadMove :: Handler ()
-setStateAfterAReadMove = do
-    playerAReadMoveRef <- fmap playerAReadMove getYesod
-    liftIO $ atomicModifyIORef playerAReadMoveRef (True,)
+        move = move gameData,
+        currentMove = currentMove gameData,
+        playerADidMove = playerADidMove gameData
+    })
     return ()
 
 
-setStateAfterMoveOfPlayerA :: Handler ()
-setStateAfterMoveOfPlayerA = do
-    currentMoveRef <- fmap currentMove getYesod
-    playerADidMoveRef <- fmap playerADidMove getYesod
+setStateAfterMoveOfPlayerA :: String -> Handler ()
+setStateAfterMoveOfPlayerA gameId = do
+    gameData <- getGameDataById gameId
+    setGameDataById gameId (SingleGamesData {
+        currentMove = B,
+        playerADidMove = True,
 
-    liftIO $ atomicModifyIORef currentMoveRef (B,)
-    liftIO $ atomicModifyIORef playerADidMoveRef (True,)
-
+        move = move gameData,
+        playerAReadMove = playerAReadMove gameData
+    })
     return ()
 
 
 
-setStateAfterMoveOfPlayerB :: Handler ()
-setStateAfterMoveOfPlayerB = do
-    currentMoveRef <- fmap currentMove getYesod
-    playerADidMoveRef <- fmap playerADidMove getYesod
-    playerAReadMoveRef <- fmap playerAReadMove getYesod
+setStateAfterMoveOfPlayerB :: String -> Handler ()
+setStateAfterMoveOfPlayerB gameId = do
+    gameData <- getGameDataById gameId
+    setGameDataById gameId (SingleGamesData {
+        currentMove = A,
+        playerADidMove = False,
+        playerAReadMove = False,
 
-    liftIO $ atomicModifyIORef currentMoveRef (A,)
-    liftIO $ atomicModifyIORef playerADidMoveRef (False,)
-    liftIO $ atomicModifyIORef playerAReadMoveRef (False,)
-
+        move = move gameData
+    })
     return ()
 
 
 
 startGameServer = do
-    emptyMoveRef <- newIORef M.emptyMove
-    currentMoveRef <- newIORef A
-    playerADidMoveRef <- newIORef False
-    -- playerBReadMoveRef <- newIORef False
-    -- playerBDidMoveRef <- newIORef False
-    playerAReadMoveRef <- newIORef False
+    emptyGamesMapRef <- newIORef (fromList [])
     warp 3000 $ GamesData {
-        move = emptyMoveRef,
-        currentMove = currentMoveRef,
-        playerADidMove = playerADidMoveRef,
-        -- playerBReadMove = playerBReadMoveRef,
-        -- playerBDidMove = playerBDidMoveRef,
-        playerAReadMove = playerAReadMoveRef
+        gamesMap = emptyGamesMapRef
     }
+
+
+getGameDataById :: String -> Handler SingleGamesData
+getGameDataById gameId = do
+    gamesDataMapRef <- fmap gamesMap getYesod
+    gamesDataMap' <- liftIO $ readIORef gamesDataMapRef
+    case lookup gameId gamesDataMap' of
+        Nothing -> return SingleGamesData {
+            move = M.emptyMove,
+            currentMove = A,
+            playerADidMove = False,
+            playerAReadMove = False
+        }
+        Just dataMap -> return dataMap
+
+setGameDataById :: String -> SingleGamesData -> Handler SingleGamesData
+setGameDataById gameId gameData = do
+    gamesDataMapRef <- fmap gamesMap getYesod
+    gamesDataMap' <- liftIO $ readIORef gamesDataMapRef
+    let newMap = insert gameId gameData gamesDataMap'
+    liftIO $ atomicModifyIORef gamesDataMapRef (newMap,)
+    return gameData
+
 
 -------------------------------------------
 main = do
     instanceType <- readInstanceType
     if instanceType == 1 then do
-        _ <- startClientGameWithRole A "http://localhost:3000"
+        _ <- startClientGameWithRole A localUrl
         return ()
-    else if instanceType == 2 then 
+    else if instanceType == 2 then
         startGameServer
     else do
         _ <- startClientGame
         return ()
 
 
-startClientGameWithRole :: Role -> String -> IO (Maybe Move) 
+startClientGameWithRole :: Role -> String -> IO (Maybe Move)
 startClientGameWithRole role serverUrl = do
     gameName' <- readGameName
-    print $ "Name of the game: " ++ gameName'
-    let url = serverUrl ++ "/" ++ gameName'
+    -- Example Monoid (under concatenation, (<>) = (++))
+    print $ "Name of the game: " <> gameName'
+    let url = serverUrl <> "/" <> gameName'
     case role of
         M.A -> do
             move <- doFirstAttack url
@@ -293,8 +317,8 @@ startGameLoop url role gameMoves = do
                     Just nextMove -> do
                         myCurrentMove <- doAttack url nextMove
                         case myCurrentMove of
-                            Just mcm -> 
-                                startGameLoop url role mcm        
+                            Just mcm ->
+                                startGameLoop url role mcm
         Nothing -> do
             print "It seems that something happened with enemy..."
             return Nothing
@@ -310,7 +334,7 @@ getLastPlayersMoveByRole move role =
 getMyNextMove :: Move -> Role -> Maybe Move
 getMyNextMove moves role = do
     let prevMove = getLastPlayersMoveByRole moves role
-    case prevMove of 
+    case prevMove of
         -- In case it's a first move for player B
         M.Empty -> return $ ValidMove (coords firstMove) (getPreviousResult moves) moves
         _ -> do
@@ -381,17 +405,17 @@ doAttack url move = do
     r <- postWith opts url (toBS m)
     let responseStatusCode = r ^. responseStatus . statusCode
     if responseStatusCode >= 200 && responseStatusCode < 300 then
-        return (Just (ValidMove (coords move) UNKNOWN (prev move))) 
+        return (Just (ValidMove (coords move) UNKNOWN (prev move)))
     else do
         print $ "Failed to attack: " ++ show (r ^. responseBody)
         return Nothing
 
 acceptDefeat :: String -> Move -> IO (Maybe Move)
-acceptDefeat url move = do 
+acceptDefeat url move = do
     print "I lost :(. Letting enemy know about it..."
     let opts = defaults & header "Content-Type" .~ [contentType]
     let moveOfDramaticFailure = ValidMove ("", "") HIT (prev move)
-    m <- parseToBEncode moveOfDramaticFailure 
+    m <- parseToBEncode moveOfDramaticFailure
     r <- postWith opts url (toBS m)
     let responseStatusCode = r ^. responseStatus . statusCode
     if responseStatusCode >= 200 && responseStatusCode < 300 then
@@ -436,6 +460,7 @@ readInstanceType = do
             | otherwise -> return 3
             -- | otherwise -> putStrLn "Type only can be 1 or 2" >> readInstanceType
         Nothing -> putStrLn "Type can't be empty" >> readInstanceType
+
 
 readNotEmptyString :: IO (Maybe String)
 readNotEmptyString = do
@@ -482,8 +507,6 @@ parseResultToBEncode result =
         MISS -> "6:result4:MISS"
         _ -> ""
 
--- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
 checkIfHit :: Coordinates -> Bool
 checkIfHit coords = do
     let hitsInColumn = filter (\c -> get2nd c == get2nd coords) shipPositions
@@ -491,8 +514,6 @@ checkIfHit coords = do
     case intendedHit of
         Just h -> True
         Nothing -> False
-
--- '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 calculateScoreOfEnemy :: Move -> Role -> Int
 calculateScoreOfEnemy move role = do
@@ -505,8 +526,8 @@ calculateScoreOfEnemy move role = do
 calculateScoreForPlayersAB :: Move -> (Int, Int)
 calculateScoreForPlayersAB move = do
     let numberOfMoves = getNumberOfMoves move
-    case prev move of 
-        ValidMove a b c -> 
+    case prev move of
+        ValidMove a b c ->
             if isEven numberOfMoves then
                 (calculateScore (prev move), calculateScore move)
             else

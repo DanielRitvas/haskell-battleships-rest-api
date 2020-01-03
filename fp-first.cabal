@@ -63,6 +63,7 @@ executable fp-first-exe
     , yesod
     , text
     , wai
+    , containers
   default-language: Haskell2010
 
 test-suite fp-first-test
